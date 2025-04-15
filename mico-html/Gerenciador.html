@@ -53,9 +53,7 @@
                         </a>
                         <a href="">
                             <i class="fa fa-envelope" aria-hidden="true"></i>
-                            <span>
-                              Email: Forescan@gmail.com
-                            </span>
+                            <span>Email: <span class="__cf_email__" data-cfemail="d791b8a5b2a4b4b6b997b0bab6bebbf9b4b8ba">[email&#160;protected]</span></span>
                         </a>
                         <a href="">
                             <i class="fa fa-map-marker" aria-hidden="true"></i>
@@ -108,8 +106,7 @@
         </header>
         <!-- End header section -->
     </div>
-
-    <!-- Gerenciador de PDFs -->
+        <!-- Gerenciador de PDFs -->
     <body>
       <div class="container">
           <h1>Gerenciador de PDFs</h1>
@@ -201,7 +198,6 @@
           // Inicializar exibição de PDFs ao carregar
           displayPDFs();
       </script>
-  </body>
     <!-- Info section -->
     <section class="info_section">
         <div class="container">
@@ -274,7 +270,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.3.0/js/bootstrap-datepicker.js"></script>
     <!-- Custom JS -->
     <script src="js/custom.js"></script>
-    <!-- JS do Gerenciador de PDFs -->
-    <script src="js/laudos.js"></script>
+
+    <!-- Script de Depuração -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('jQuery carregado:', typeof $ !== 'undefined' ? 'Sim' : 'Não');
+            console.log('Bootstrap carregado:', typeof $.fn.tab !== 'undefined' ? 'Sim' : 'Não');
+            console.log('custom.js carregado:', typeof displayPDFs !== 'undefined' ? 'Sim' : 'Não');
+        });
+    </script>
 </body>
 </html>

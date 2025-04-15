@@ -48,7 +48,7 @@ body {
 }
 
 .heading_container h2 span {
-  color: #00c6a9;
+  color: #A7CAC9;
 }
 
 .heading_container.heading_center {
@@ -105,11 +105,11 @@ a:focus {
 }
 
 .header_section .header_top .contact_nav a i {
-  color: #00c6a9;
+  color: #172C66;
 }
 
 .header_section .header_bottom {
-  background-color: #00c6a9;
+  background-color: #A7CAC9;
 }
 
 .header_section .header_bottom .container-fluid {
@@ -133,7 +133,7 @@ a:focus {
 .custom_nav-container .navbar-nav .nav-item .nav-link {
   padding: 3px 15px;
   margin: 10px 15px;
-  color: #ffffff;
+  color: #172C66;
   text-align: center;
   text-transform: uppercase;
 }
@@ -147,7 +147,7 @@ a:focus {
   height: 35px;
   padding: 0;
   border: none;
-  color: #ffffff;
+  color: #172C66;
 }
 
 .custom_nav-container .nav_search-btn:hover {
@@ -170,7 +170,7 @@ a:focus {
   display: block;
   width: 35px;
   height: 4px;
-  background-color: #ffffff;
+  background-color: #172C66;
   margin: 7px 0;
   -webkit-transition: all 0.3s;
   transition: all 0.3s;
@@ -186,7 +186,7 @@ a:focus {
   left: 0;
   height: 100%;
   width: 100%;
-  background-color: #ffffff;
+  background-color: #172C66;
   top: -10px;
   border-radius: 5px;
   -webkit-transition: all .3s;
@@ -248,7 +248,7 @@ a:focus {
 }
 
 .quote_btn-container a {
-  color: #ffffff;
+  color: #172C66;
   margin-right: 25px;
   text-transform: uppercase;
 }
@@ -324,7 +324,7 @@ a:focus {
 }
 
 .slider_section .play_btn button {
-  background-color: #00c6a9;
+  background-color: #172C66;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -351,7 +351,7 @@ a:focus {
   position: absolute;
   top: 50%;
   left: 50%;
-  background-color: #00c6a9;
+  background-color: #172C66;
   opacity: 1;
   border-radius: 100%;
   -webkit-transform: translate(-50%, -50%);
@@ -402,7 +402,7 @@ a:focus {
 }
 
 .slider_section .detail-box h1 span {
-  color: #00c6a9;
+  color: #172C66;
 }
 
 .slider_section .detail-box p {
@@ -448,7 +448,7 @@ a:focus {
   position: unset;
   width: 50px;
   height: 50px;
-  background-color: #00c6a9;
+  background-color: #172C66;
   opacity: 1;
 }
 
@@ -469,7 +469,7 @@ a:focus {
 }
 
 .book_section h4 span {
-  color: #00c6a9;
+  color: #A7CAC9;
 }
 
 .book_section h4::before {
@@ -479,7 +479,7 @@ a:focus {
   bottom: 0;
   width: 75px;
   height: 2px;
-  background-color: #00c6a9;
+  background-color: #A7CAC9;
 }
 
 .book_section form {
@@ -495,7 +495,7 @@ a:focus {
 .book_section form .form-control {
   width: 100%;
   background-color: transparent;
-  border: 1px solid #00c6a9;
+  border: 1px solid #172C66;
   height: 45px;
   outline: none;
   -webkit-box-shadow: none;
@@ -505,27 +505,27 @@ a:focus {
 }
 
 .book_section form .form-control::-webkit-input-placeholder {
-  color: #00c6a9;
+  color: #172C66;
 }
 
 .book_section form .form-control:-ms-input-placeholder {
-  color: #00c6a9;
+  color: #172C66;
 }
 
 .book_section form .form-control::-ms-input-placeholder {
-  color: #00c6a9;
+  color: #172C66;
 }
 
 .book_section form .form-control::placeholder {
-  color: #00c6a9;
+  color: #172C66;
 }
 
 .book_section form #inputDate {
-  color: #00c6a9;
+  color: #172C66;
 }
 
 .book_section form #inputDate input {
-  color: #00c6a9;
+  color: #172C66;
 }
 
 .book_section form button.btn {
@@ -552,7 +552,7 @@ a:focus {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
-  color: #00c6a9;
+  color: #172C66;
 }
 
 .book_section .nice-select:after {
@@ -644,7 +644,7 @@ a:focus {
 
 .treatment_section .box .detail-box a {
   text-transform: uppercase;
-  color: #00c6a9;
+  color: #172C66;
 }
 
 .treatment_section .box .detail-box a:hover {
@@ -652,7 +652,7 @@ a:focus {
 }
 
 .team_section {
-  background-color: #00c6a9;
+  background-color: #A7CAC9;
 }
 
 .team_section .heading_container {
@@ -666,7 +666,7 @@ a:focus {
 }
 
 .team_section .heading_container h2 span {
-  color: #ffffff;
+  color: #172C66;
 }
 
 .team_section .box {
@@ -685,7 +685,7 @@ a:focus {
   transition: all 0.3s;
   padding: 0 10px;
   background: -webkit-gradient(linear, left top, left bottom, color-stop(10%, transparent), color-stop(10%, #ffffff));
-  background: linear-gradient(to bottom, transparent 10%, #ffffff 10%);
+  background: linear-gradient(to bottom, transparent 10%, #172C66 10%);
 }
 
 .team_section .box .img-box img {
@@ -704,7 +704,7 @@ a:focus {
 }
 
 .team_section .box .detail-box h6 {
-  color: #00c6a9;
+  color: #172C66;
 }
 
 .team_section .box .detail-box .social_box {
@@ -754,9 +754,9 @@ a:focus {
   top: 50%;
   width: 50px;
   height: 50px;
-  background-color: #ffffff;
+  background-color: #172C66;
   outline: none;
-  color: #000000;
+  color: #ffffff;
   -webkit-transform: translateY(-50%);
           transform: translateY(-50%);
   font-size: 28px;
@@ -803,7 +803,7 @@ a:focus {
 
 .client_section .box .client_info .client_name h5 {
   font-weight: 600;
-  color: #00c6a9;
+  color: #172C66;
 }
 
 .client_section .box .client_info .client_name h6 {
@@ -825,7 +825,7 @@ a:focus {
 .client_section .carousel-control-next {
   width: 45px;
   height: 125px;
-  background-color: #00c6a9;
+  background-color: #172C66;
   opacity: 1;
   font-size: 28px;
   font-weight: bold;
@@ -860,7 +860,7 @@ a:focus {
 
 .contact_section .form_container input {
   width: 100%;
-  border: 1px solid #00c6a9;
+  border: 1px solid #172C66;
   height: 50px;
   margin-bottom: 25px;
   padding-left: 15px;
@@ -870,19 +870,19 @@ a:focus {
 }
 
 .contact_section .form_container input::-webkit-input-placeholder {
-  color: #00c6a9;
+  color: #172C66;
 }
 
 .contact_section .form_container input:-ms-input-placeholder {
-  color: #00c6a9;
+  color: #172C66;
 }
 
 .contact_section .form_container input::-ms-input-placeholder {
-  color: #00c6a9;
+  color: #172C66;
 }
 
 .contact_section .form_container input::placeholder {
-  color: #00c6a9;
+  color: #172C66;
 }
 
 .contact_section .form_container input.message-box {
@@ -894,14 +894,14 @@ a:focus {
   text-transform: uppercase;
   display: inline-block;
   padding: 15px 65px;
-  background-color: #00c6a9;
+  background-color: #172C66;
   color: #ffffff;
   border-radius: 0;
   font-weight: bold;
 }
 
 .contact_section .form_container button:hover {
-  background-color: #00937d;
+  background-color: #172C66;
 }
 
 .contact_section .img-box img {
@@ -981,7 +981,7 @@ a:focus {
 
 .info_section .info_form form button {
   background-color: transparent;
-  color: #00c6a9;
+  color: #ffffff;
   margin-top: 15px;
   text-transform: uppercase;
   font-size: 15px;
@@ -1005,7 +1005,7 @@ a:focus {
   left: 0;
   width: 15px;
   height: 15px;
-  background-color: #00c6a9;
+  background-color: #A7CAC9;
   -webkit-transform: translateY(-50%);
           transform: translateY(-50%);
 }
@@ -1029,7 +1029,7 @@ a:focus {
 }
 
 .info_section .info_links .info_links_menu a:hover, .info_section .info_links .info_links_menu a.active {
-  color: #00c6a9;
+  color: #A7CAC9;
 }
 
 .info_section .info_post .post_box {
@@ -1108,7 +1108,7 @@ a:focus {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
-  color: #00c6a9;
+  color: #A7CAC9;
   font-size: 24px;
   margin-right: 10px;
 }
@@ -1145,7 +1145,7 @@ a:focus {
 }
 
 .auth-link:hover {
-  color: #007bff;
+  color: #A7CAC9;
 }
 
 .popupContainer {
@@ -1226,12 +1226,12 @@ a:focus {
   padding: 10px;
   text-decoration: none;
   color: #fff;
-  background: #007bff;
+  background: #A7CAC9;
   border-radius: 4px;
 }
 
 .btn_red {
-  background: #dc3545;
+  background: #A7CAC9;
 }
 
 .back_btn {
@@ -1269,7 +1269,7 @@ form input {
   display: block;
   text-align: center;
   margin-top: 10px;
-  color: #007bff;
+  color: #A7CAC9;
   text-decoration: none;
 }
 
@@ -1292,13 +1292,13 @@ form input {
 }
 
 .laudo-form .form-control:focus {
-  border-color: #007bff;
+  border-color: #A7CAC9;
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
 }
 
 /* Estilo para o botão preto */
 .btn-black {
-  background-color: black;
+  background-color: #A7CAC9;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -1340,17 +1340,17 @@ form input {
   display: flex;
   align-items: center;
   gap: 8px;
-  border: 2px dashed #007bff;
+  border: 2px dashed #172C66;
   background-color: #f8f9fa;
-  color: #007bff;
+  color: #172C66;
   padding: 8px 16px;
   transition: all 0.3s ease;
 }
 
 .btn-upload:hover {
-  background-color: #007bff;
+  background-color: #172C66;
   color: white;
-  border-color: #0056b3;
+  border-color: #172C66;
 }
 
 .btn-upload i {
@@ -1399,12 +1399,105 @@ form input {
   align-items: center;
 }
 
+/* Estilos para o Gerenciador de PDFs */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.container h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 2rem;
+  color: #333;
+}
+
+.tab-buttons {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.tab-buttons button {
+  padding: 10px 20px;
+  margin: 0 5px;
+  border: none;
+  background-color: #A7CAC9;
+  color: #172C66;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.tab-buttons button:hover {
+  background-color: #A7CAC9;
+}
+
+.tab {
+  display: none;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.tab.active {
+  display: block;
+}
+
+.tab h2 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.tab input[type="file"] {
+  display: block;
+  margin: 10px 0;
+}
+
+.tab button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #A7CAC9;
+  color: #172C66;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.tab button:hover {
+  background-color: #A7CAC9;
+}
+
+#pdf-list {
+  list-style: none;
+  padding: 0;
+}
+
+#pdf-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
 #pdf-list li a {
-  color: #007bff;
+  color: #172C66;
   text-decoration: none;
 }
 
 #pdf-list li a:hover {
   text-decoration: underline;
+}
+
+#pdf-list li button {
+  background-color: #dc3545;
+}
+
+#pdf-list li button:hover {
+  background-color: #c82333;
 }
 /*# sourceMappingURL=style.css.map */
