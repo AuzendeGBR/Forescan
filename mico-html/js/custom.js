@@ -80,5 +80,29 @@ document.addEventListener('DOMContentLoaded', () => {
     modalClose.addEventListener('click', () => {
       modal.style.display = 'none';
       showForm(loginForm); // Volta para o login por padrão (opcional)
+      document.addEventListener('DOMContentLoaded', function () {
+        // Verifica se o elemento #foto existe
+        const fotoInput = document.getElementById('foto');
+        if (!fotoInput) {
+            console.error("Elemento com ID 'foto' não encontrado.");
+            return;
+        }
+    
+        // Verifica se o elemento #file-names existe
+        const fileNamesSpan = document.getElementById('file-names');
+        if (!fileNamesSpan) {
+            console.error("Elemento com ID 'file-names' não encontrado.");
+            return;
+        }
+    
+        // Adiciona o evento de mudança ao input de arquivo
+        fotoInput.addEventListener('change', function () {
+            const fileNames = Array.from(this.files).map(file => file.name).join(', ');
+            fileNamesSpan.textContent = fileNames || '';
+        });
+    });
+    
     });
   });
+
+  

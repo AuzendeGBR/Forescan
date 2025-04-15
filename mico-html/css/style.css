@@ -1310,4 +1310,101 @@ form input {
   color: white;
 }
 
+.btn-upload {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 2px dashed #000000;
+  background-color: #f8f9fa;
+  color: #000000;
+  padding: 8px 16px;
+  transition: all 0.3s ease;
+}
+
+.btn-upload:hover {
+  background-color: #000000;
+  color: white;
+  border-color: #0056b3;
+}
+
+.btn-upload i {
+  font-size: 1.2rem;
+}
+
+#file-names {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+/* Estilos existentes para o botão de upload */
+.btn-upload {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 2px dashed #007bff;
+  background-color: #f8f9fa;
+  color: #007bff;
+  padding: 8px 16px;
+  transition: all 0.3s ease;
+}
+
+.btn-upload:hover {
+  background-color: #007bff;
+  color: white;
+  border-color: #0056b3;
+}
+
+.btn-upload i {
+  font-size: 1.2rem;
+}
+
+#file-names {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+/* Novos estilos para os botões */
+.button-container {
+  display: flex;
+  gap: 10px; /* Espaço entre os botões */
+}
+
+.btn-custom {
+  background-color: #000; /* Preto */
+  color: #fff; /* Texto branco */
+  border: none;
+  padding: 10px 20px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-custom:hover {
+  background-color: #333; /* Um tom mais claro de preto ao passar o mouse */
+}
+
+.pdf-container {
+  margin-top: 20px;
+}
+
+#pdf-list {
+  list-style: none;
+  padding: 0;
+}
+
+#pdf-list li {
+  padding: 10px;
+  background: #f8f9fa;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#pdf-list li a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+#pdf-list li a:hover {
+  text-decoration: underline;
+}
 /*# sourceMappingURL=style.css.map */
