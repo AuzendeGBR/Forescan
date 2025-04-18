@@ -14,7 +14,6 @@
 
   <title>Forescan</title>
 
-
   <!-- bootstrap core css -->
   <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
 
@@ -54,7 +53,7 @@
             <a href="">
               <i class="fa fa-envelope" aria-hidden="true"></i>
               <span>
-                Email: Forescan@gmail.com
+                Email: <span class="__cf_email__" data-cfemail="20664f52455343414e60474d41494c0e434f4d">[email&#160;protected]</span>
               </span>
             </a>
             <a href="">
@@ -72,7 +71,6 @@
             <a class="navbar-brand" href="index.html">
               <img src="images/logo.png" alt="">
             </a>
-
 
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
               <span class=""> </span>
@@ -103,19 +101,18 @@
               </div>
               <div class="quote_btn-container">
                 <nav class="auth-links">
-<!-- Links de Login e Sign Up -->
-<nav class="auth-links">
-  <a href="#" class="auth-link login" data-modal="login_form">
-    <i class="fa fa-user" aria-hidden="true"></i>
-    <span>Entrar</span>
-  </a>
-  <a href="#" class="auth-link signup" data-modal="register_form">
-    <i class="fa fa-user-plus" aria-hidden="true"></i>
-    <span>Cadastrar</span>
-  </a>
-</nav>
-
-<!-- Modal de Login/Cadastro -->
+                  <!-- Links de Login e Sign Up -->
+                  <nav class="auth-links">
+                    <a href="#" class="auth-link login" data-modal="login_form">
+                      <i class="fa fa-user" aria-hidden="true"></i>
+                      <span>Entrar</span>
+                    </a>
+                    <a href="#" class="auth-link signup" data-modal="register_form">
+                      <i class="fa fa-user-plus" aria-hidden="true"></i>
+                      <span>Cadastrar</span>
+                    </a>
+                  </nav>
+<!-- Substitua o conteúdo atual do seu modal de autenticação por este -->
 <div id="modal" class="popupContainer" style="display: none;">
   <div class="popupHeader">
     <span class="header_title">Autenticação</span>
@@ -123,7 +120,7 @@
   </div>
   <section class="popupBody">
     <!-- Formulário de Login -->
-    <div class="user_login" style="display: none;">
+    <div class="user_login">
       <form>
         <label>Email / Nome de usuário</label>
         <input type="text" required />
@@ -141,7 +138,7 @@
           </div>
         </div>
       </form>
-      <a href="#" class="forgot_password">Esqueceu a senha?</a>
+      <a href="#" class="forgot_password" onclick="showPasswordRecovery(); return false;">Esqueceu a senha?</a>
     </div>
 
     <!-- Formulário de Cadastro -->
@@ -167,13 +164,142 @@
         </div>
       </form>
     </div>
+
+    <!-- Recuperação de Senha - Etapa 1: Informar Email -->
+    <div class="password_recovery step1" style="display: none;">
+      <h4>Recuperação de Senha</h4>
+      <p>Informe seu e-mail para receber um código de redefinição.</p>
+      <form>
+        <label>Email cadastrado</label>
+        <input type="email" id="recoveryEmail" required />
+        <br />
+        <div class="action_btns">
+          <div class="one_half">
+            <a href="#" class="btn btn_gray" onclick="showLoginForm(); return false;">Voltar</a>
+          </div>
+          <div class="one_half last">
+            <a href="#" class="btn btn_red" onclick="sendRecoveryCode(); return false;">Enviar código</a>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Recuperação de Senha - Etapa 2: Código de Verificação -->
+    <div class="password_recovery step2" style="display: none;">
+      <h4>Verificação de Código</h4>
+      <p>Digite o código que enviamos para seu e-mail.</p>
+      <form>
+        <label>Código de verificação</label>
+        <input type="text" id="verificationCode" required />
+        <br />
+        <div class="action_btns">
+          <div class="one_half">
+            <a href="#" class="btn btn_gray" onclick="backToRecoveryStep1(); return false;">Voltar</a>
+          </div>
+          <div class="one_half last">
+            <a href="#" class="btn btn_red" onclick="verifyCode(); return false;">Verificar</a>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Recuperação de Senha - Etapa 3: Nova Senha -->
+    <div class="password_recovery step3" style="display: none;">
+      <h4>Definir Nova Senha</h4>
+      <p>Crie uma nova senha para sua conta.</p>
+      <form>
+        <label>Nova senha</label>
+        <input type="password" id="newPassword" required />
+        <br />
+        <label>Confirmar senha</label>
+        <input type="password" id="confirmPassword" required />
+        <br />
+        <div class="action_btns">
+          <div class="one_half">
+            <a href="#" class="btn btn_gray" onclick="backToRecoveryStep2(); return false;">Voltar</a>
+          </div>
+          <div class="one_half last">
+            <a href="#" class="btn btn_red" onclick="resetPassword(); return false;">Confirmar</a>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Mensagem de Sucesso -->
+    <div class="password_recovery success" style="display: none;">
+      <div class="success_icon">
+        <i class="fa fa-check-circle" style="font-size: 48px; color: #28a745;"></i>
+      </div>
+      <h4>Senha Redefinida!</h4>
+      <p>Sua senha foi alterada com sucesso.</p>
+      <div class="action_btns">
+        <div class="one_half last" style="width: 100%; text-align: center;">
+          <a href="#" class="btn btn_red" onclick="showLoginForm(); return false;">Voltar para Login</a>
+        </div>
+      </div>
+    </div>
   </section>
 </div>
-                <form class="form-inline">
-                  <button class="btn  my-2 my-sm-0 nav_search-btn" type="submit">
-                    <i class="fa fa-search" aria-hidden="true"></i>
-                  </button>
-                </form>
+                  <!-- Modal de Login/Cadastro -->
+                  <div id="modal" class="popupContainer" style="display: none;">
+                    <div class="popupHeader">
+                      <span class="header_title">Autenticação</span>
+                      <span class="modal_close"><i class="fa fa-times"></i></span>
+                    </div>
+                    <section class="popupBody">
+                      <!-- Formulário de Login -->
+                      <div class="user_login" style="display: none;">
+                        <form>
+                          <label>Email / Nome de usuário</label>
+                          <input type="text" required />
+                          <br />
+                          <label>Senha</label>
+                          <input type="password" required />
+                          <br />
+                          <div class="checkbox">
+                            <input id="remember" type="checkbox" />
+                            <label for="remember">Lembrar-me neste computador</label>
+                          </div>
+                          <div class="action_btns">
+                            <div class="one_half last">
+                              <a href="#" class="btn btn_red">Entrar</a>
+                            </div>
+                          </div>
+                        </form>
+                        <a href="#" class="forgot_password">Esqueceu a senha?</a>
+                      </div>
+
+                      <!-- Formulário de Cadastro -->
+                      <div class="user_register" style="display: none;">
+                        <form>
+                          <label>Nome completo</label>
+                          <input type="text" required />
+                          <br />
+                          <label>Endereço de e-mail</label>
+                          <input type="email" required />
+                          <br />
+                          <label>Senha</label>
+                          <input type="password" required />
+                          <br />
+                          <div class="checkbox">
+                            <input id="send_updates" type="checkbox" />
+                            <label for="send_updates">Enviar-me atualizações por e-mail ocasionalmente</label>
+                          </div>
+                          <div class="action_btns">
+                            <div class="one_half last">
+                              <a href="#" class="btn btn_red">Cadastrar</a>
+                            </div>
+                          </div>
+                        </form>
+                      </div>
+                    </section>
+                  </div>
+                  <form class="form-inline">
+                    <button class="btn  my-2 my-sm-0 nav_search-btn" type="submit">
+                      <i class="fa fa-search" aria-hidden="true"></i>
+                    </button>
+                  </form>
+                </nav>
               </div>
             </div>
           </nav>
@@ -287,14 +413,11 @@
           </a>
         </div>
       </div>
-
     </section>
     <!-- end slider section -->
   </div>
 
-
   <!-- book section -->
-
   <section class="book_section layout_padding">
     <div class="container">
       <div class="row">
@@ -319,7 +442,7 @@
               <div class="form-group col-lg-4">
                 <label for="inputDepartmentName">Não sabemos </label>
                 <select name="" class="form-control wide" id="inputDepartmentName">
-                  <option value="???" ">oq colocamos? </option>
+                  <option value="???">oq colocamos? </option>
                   <option value="???">oq colocamos? </option>
                   <option value="???">oq colocamos? </option>
                 </select>
@@ -352,12 +475,9 @@
       </div>
     </div>
   </section>
-
-
   <!-- end book section -->
 
   <!-- team section -->
-
   <section class="team_section layout_padding">
     <div class="container">
       <div class="heading_container heading_center">
@@ -376,9 +496,8 @@
                 <h5>
                   Laudo 01
                 </h5>
-
                 <div class="btn-box">
-                  <button type="submit" class="btn" style="background-color: black; color: white;">Adicione o laudo</button>
+                  <a href="Laudos.html?laudo=01" class="btn" style="background-color: black; color: white;">Seus Laudos</a>
                 </div>
               </div>
             </div>
@@ -392,9 +511,8 @@
                 <h5>
                   Laudo 02
                 </h5>
-
                 <div class="btn-box">
-                  <button type="submit" class="btn" style="background-color: black; color: white;">Adicione o laudo</button>
+                  <a href="Laudos.html?laudo=02" class="btn" style="background-color: black; color: white;">Seus Laudos</a>
                 </div>
               </div>
             </div>
@@ -408,9 +526,8 @@
                 <h5>
                   Laudo 03
                 </h5>
-
                 <div class="btn-box">
-                  <button type="submit" class="btn" style="background-color: black; color: white;">Adicione o laudo</button>
+                  <a href="Laudos.html?laudo=03" class="btn" style="background-color: black; color: white;">Seus Laudos</a>
                 </div>
               </div>
             </div>
@@ -419,9 +536,7 @@
       </div>
     </div>
   </section>
-
   <!-- end team section -->
-
 
   <!-- client section -->
   <section class="client_section layout_padding">
@@ -469,6 +584,7 @@
               <p>
                 Nunca imaginei que um app pudesse facilitar tanto o trabalho pericial.
 Desde que comecei a usar o aplicativo, meus laudos ficaram mais organizados e profissionais. Ele permite anexar imagens, montar pareceres completos e ainda mantém tudo armazenado na nuvem de forma segura. Economizo tempo e ganho mais confiança na entrega dos meus relatórios. Recomendo fortemente para colegas da odontologia legal.
+              </p>
             </div>
           </div>
           <div class="carousel-item">
@@ -487,6 +603,7 @@ Desde que comecei a usar o aplicativo, meus laudos ficaram mais organizados e pr
               <p>
                 "Prático, moderno e feito pra quem entende da área."
 Sou perito há mais de 10 anos e posso afirmar que esse aplicativo foi um divisor de águas. A padronização dos documentos, a facilidade em acessar históricos de casos e a agilidade no envio dos laudos me impressionaram. É uma solução que veio pra ficar.
+              </p>
             </div>
           </div>
         </div>
@@ -545,7 +662,7 @@ Sou perito há mais de 10 anos e posso afirmar que esse aplicativo foi um diviso
               <a href="">
                 <i class="fa fa-envelope"></i>
                 <span>
-                  Forescan@gmail.com
+                  <span class="__cf_email__" data-cfemail="2c6a435e495f4f4d426c4b414d4540024f4341">[email&#160;protected]</span>
                 </span>
               </a>
             </div>
@@ -593,24 +710,26 @@ Sou perito há mais de 10 anos e posso afirmar que esse aplicativo foi um diviso
           </div>
           <div class="col-md-6 col-lg-3">
             <div class="info_post">
-  
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
   <!-- end info_section -->
-
 
   <!-- footer section -->
   <footer class="footer_section">
     <div class="container">
       <p>
         &copy; <span id="displayYear"></span> 
-       
       </p>
     </div>
   </footer>
   <!-- footer section -->
 
   <!-- jQery -->
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
   <script src="js/jquery-3.4.1.min.js"></script>
   <!-- bootstrap js -->
   <script src="js/bootstrap.js"></script>
@@ -623,7 +742,7 @@ Sou perito há mais de 10 anos e posso afirmar que esse aplicativo foi um diviso
   <!-- custom js -->
   <script src="js/custom.js"></script>
 
-
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9322038f1c19bd03',t:'MTc0NDk1Njc4Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 
 </html>

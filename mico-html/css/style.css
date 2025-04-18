@@ -1500,4 +1500,123 @@ form input {
 #pdf-list li button:hover {
   background-color: #c82333;
 }
+
+/* [Seu CSS existente permanece inalterado até a seção de botões] */
+
+/* Estilos existentes para o botão de upload */
+.btn-upload {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 2px dashed #172C66;
+  background-color: #f8f9fa;
+  color: #172C66;
+  padding: 8px 16px;
+  transition: all 0.3s ease;
+}
+
+.btn-upload:hover {
+  background-color: #172C66;
+  color: white;
+  border-color: #172C66;
+}
+
+.btn-upload i {
+  font-size: 1.2rem;
+}
+
+#file-names {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+/* Novos estilos para os botões */
+.button-container {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-custom {
+  background-color: #000;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-custom:hover {
+  background-color: #333;
+}
+
+/* Estilo para o carrossel de laudos */
+.team_section .box .detail-box .btn-box .btn-custom {
+  width: 100%;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* Estilo para mensagem de nenhum laudo */
+.team_section .box .detail-box p {
+  color: #333;
+  font-size: 1rem;
+  margin: 15px 0;
+}
+
+/* Ajustes para o campo Nome do Perito (Nice Select) */
+.laudo-form .nice-select {
+  width: 100%;
+  height: 45px; /* Mesma altura dos .form-control */
+  line-height: 45px; /* Centralizar texto verticalmente */
+  border: 1px solid #ced4da; /* Mesma borda dos .form-control */
+  border-radius: 5px; /* Bordas arredondadas */
+  padding: 0 15px; /* Mesmo padding interno */
+  background-color: #fff; /* Fundo branco */
+  font-size: 1rem; /* Mesma fonte */
+  color: #333; /* Cor do texto */
+}
+
+.laudo-form .nice-select .current {
+  color: #333; /* Cor do texto selecionado */
+}
+
+.laudo-form .nice-select .list {
+  width: 100%; /* Lista dropdown ocupa a mesma largura */
+  border-radius: 5px;
+  border: 1px solid #ced4da;
+  max-height: 200px; /* Limitar altura da lista */
+  overflow-y: auto;
+}
+
+.laudo-form .nice-select .option {
+  padding: 10px 15px;
+  color: #333;
+}
+
+.laudo-form .nice-select .option:hover,
+.laudo-form .nice-select .option.focus,
+.laudo-form .nice-select .option.selected.focus {
+  background-color: #f8f9fa;
+  color: #172C66;
+}
+
+.laudo-form .nice-select:after {
+  right: 15px; /* Ajustar posição da seta */
+  border-color: #172C66; /* Cor da seta */
+}
+
+.laudo-form .nice-select.open:after {
+  border-color: #172C66;
+}
+
+.laudo-form .mb-3 {
+  margin-bottom: 1.5rem !important; /* Garantir espaçamento uniforme */
+}
+
+.laudo-form .form-label {
+  margin-bottom: 0.5rem; /* Alinhar labels */
+  font-weight: 600;
+  color: #333;
+}
+
+/* [Seu CSS existente continua abaixo, como .pdf-container, etc.] */
 /*# sourceMappingURL=style.css.map */
