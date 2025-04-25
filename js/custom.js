@@ -184,7 +184,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const filtroNomeCaso = document.getElementById('filtroNomeCaso');
     const paginationNumbers = document.getElementById('paginationNumbers');
     const laudosCarousel = document.getElementById('laudosCarousel');
-    const { jsPDF } = window.jspdf;
 
     let casos = [];
     const casosPorPagina = 5;
@@ -249,8 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const podeExcluir = tipoUsuario === 'Administrador';
 
       casosPaginados.forEach((caso, index) => {
-        const nomeCasoDisplay = caso.nomeCaso || 'N/A'; // Corrigido de nomeCasoDisplay para nomeCaso
-        const fotosCount = caso.fotos ? caso.fotos.length : 0;
+        const nomeCasoDisplay = caso.nomeCaso || 'N/A';
         const row = document.createElement('tr');
         row.innerHTML = `
           <td>${inicio + index + 1}</td>
@@ -266,15 +264,10 @@ document.addEventListener('DOMContentLoaded', () => {
               </select>
             ` : caso.status || 'Em andamento'}
           </td>
-          <td>${fotosCount} foto(s)</td>
           <td>
             <a href="Adicionar_evidencias.html?casoId=${caso.id}" class="btn btn-black btn-sm"><i class="bi bi-plus-circle"></i> Adicionar</a>
-          </td>
-          <td>
-            <button class="btn btn-black" onclick="gerarPDF(${casos.indexOf(caso)})">Gerar PDF</button>
-            <a href="Laudos.html?id=${caso.id}" class="btn btn-primary">Visualizar</a>
-            ${podeEditar ? `<a href="Adicionar_casos.html?id=${caso.id}" class="btn btn-primary">Editar</a>` : ''}
-            ${podeExcluir ? `<button class="btn btn-danger" onclick="excluirCaso('${caso.id}')">Excluir</button>` : ''}
+            <a href="Laudos.html?id=${caso.id}" class="btn btn-primary btn-sm">Visualizar</a>
+            ${podeExcluir ? `<button class="btn btn-danger btn-sm" onclick="excluirCaso('${caso.id}')">Excluir</button>` : ''}
           </td>
         `;
         laudosTable.appendChild(row);
@@ -420,99 +413,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     }
-
-    window.gerarPDF = function(index) {
-      const caso = casos[index];
-      const doc = new jsPDF();
-      const pageHeight = doc.internal.pageSize.height;
-      const margin = 10;
-      const maxWidth = 180;
-      let yPosition = margin;
-      const lineHeight = 10;
-      const imageHeight = 50;
-      const imageWidth = 50;
-      const spaceAfterImage = 10;
-
-      function checkPageSpace(requiredHeight) {
-        if (yPosition + requiredHeight > pageHeight - margin) {
-          doc.addPage();
-          yPosition = margin;
-        }
-      }
-
-      doc.setFontSize(16);
-      doc.text('Relatório de Caso', margin, yPosition);
-      yPosition += lineHeight * 2;
-
-      doc.setFontSize(12);
-      checkPageSpace(lineHeight);
-      doc.text(`Nome do Caso: ${caso.nomeCaso || 'N/A'}`, margin, yPosition);
-      yPosition += lineHeight;
-
-      checkPageSpace(lineHeight);
-      doc.text(`Data: ${caso.data || 'N/A'}`, margin, yPosition);
-      yPosition += lineHeight;
-
-      checkPageSpace(lineHeight);
-      doc.text(`Perito: ${caso.perito || 'N/A'}`, margin, yPosition);
-      yPosition += lineHeight;
-
-      checkPageSpace(lineHeight);
-      doc.text(`Status: ${caso.status || 'Em andamento'}`, margin, yPosition);
-      yPosition += lineHeight * 2;
-
-      checkPageSpace(lineHeight);
-      doc.text('Detalhe do Caso:', margin, yPosition);
-      yPosition += lineHeight;
-      const descricaoLines = doc.splitTextToSize(caso.descricao || 'N/A', maxWidth);
-      for (const line of descricaoLines) {
-        checkPageSpace(lineHeight);
-        doc.text(line, margin, yPosition);
-        yPosition += lineHeight;
-      }
-      yPosition += lineHeight;
-
-      checkPageSpace(lineHeight);
-      doc.text('Evidência:', margin, yPosition);
-      yPosition += lineHeight;
-      const diagnosticoLines = doc.splitTextToSize(caso.diagnostico || 'N/A', maxWidth);
-      for (const line of diagnosticoLines) {
-        checkPageSpace(lineHeight);
-        doc.text(line, margin, yPosition);
-        yPosition += lineHeight;
-      }
-      yPosition += lineHeight;
-
-      checkPageSpace(lineHeight);
-      doc.text('Observações:', margin, yPosition);
-      yPosition += lineHeight;
-      const observacoesLines = doc.splitTextToSize(caso.observacoes || 'Nenhuma', maxWidth);
-      for (const line of observacoesLines) {
-        checkPageSpace(lineHeight);
-        doc.text(line, margin, yPosition);
-        yPosition += lineHeight;
-      }
-      yPosition += lineHeight * 2;
-
-      if (caso.fotos && caso.fotos.length > 0) {
-        checkPageSpace(lineHeight);
-        doc.text('Fotos:', margin, yPosition);
-        yPosition += lineHeight;
-
-        caso.fotos.forEach((foto, i) => {
-          try {
-            checkPageSpace(imageHeight + spaceAfterImage);
-            doc.addImage(foto, 'JPEG', margin, yPosition, imageWidth, imageHeight);
-            yPosition += imageHeight + spaceAfterImage;
-          } catch (e) {
-            console.error(`Erro ao adicionar foto ${i + 1}:`, e);
-            mostrarToast(`Erro ao adicionar foto ${i + 1}.`, 'warning');
-          }
-        });
-      }
-
-      doc.save(`caso_${(caso.nomeCaso || 'caso').replace(/\s+/g, '_')}_${caso.id}.pdf`);
-    };
 
     function atualizarCasos() {
       if (!laudosCarousel) return;
@@ -1041,3 +941,34 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// Inicializar IndexedDB
+let dbPromise = null;
+const paginasQueUsamIndexedDB = [
+  'index.html',
+  'Adicionar_casos.html',
+  'Laudos.html',
+  'Adicionar_evidencias.html',
+  'Visualizar_evidencia.html'
+];
+if (paginasQueUsamIndexedDB.some(pagina => window.location.pathname.includes(pagina))) {
+  try {
+    dbPromise = idb.openDB('forescanDB', 1, {
+      upgrade(db) {
+        // Criar objectStore para laudos
+        if (!db.objectStoreNames.contains('laudos')) {
+          db.createObjectStore('laudos', { keyPath: 'id' });
+        }
+        // Criar objectStore para evidencias
+        if (!db.objectStoreNames.contains('evidencias')) {
+          const store = db.createObjectStore('evidencias', { keyPath: 'id', autoIncrement: true });
+          store.createIndex('casoId', 'casoId', { unique: false });
+        }
+      }
+    });
+    console.log('IndexedDB inicializado com sucesso.');
+  } catch (err) {
+    console.error('Erro ao inicializar IndexedDB:', err);
+    mostrarToast('Erro ao inicializar o banco de dados.', 'danger');
+  }
+}

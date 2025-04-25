@@ -3,10 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="keywords" content="">
-  <meta name="description" content="">
-  <meta name="author" content="">
-  <title>Forescan - Visualizar Laudo</title>
+  <title>Forescan - Visualizar Caso</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link href="css/font-awesome.min.css" rel="stylesheet">
@@ -27,7 +24,7 @@
             </a>
             <a href="">
               <i class="fa fa-envelope" aria-hidden="true"></i>
-              <span>Email: <span class="__cf_email__" data-cfemail="9af9f5f4eefbeef5dafcf5e8ffe9f9fbf4b4f9f5f7">[email protected]</span></span>
+              <span>Email: contato@forescan.com</span>
             </a>
             <a href="">
               <i class="fa fa-map-marker" aria-hidden="true"></i>
@@ -38,7 +35,7 @@
       </div>
       <div class="header_bottom">
         <div class="container-fluid">
-          <nav class="navbar navbar-expand-lg custom_nav-container ">
+          <nav class="navbar navbar-expand-lg custom_nav-container">
             <a class="navbar-brand" href="index.html">
               <img src="images/Logo.png" alt="Logo da Forescan" class="logo-img">
             </a>
@@ -61,13 +58,6 @@
                     <a class="nav-link" href="Laudos.html">Visualizar Casos<span class="sr-only">(current)</span></a>
                   </li>
                 </ul>
-              </div>
-              <div class="quote_btn-container">
-                <form class="form-inline">
-                  <button class="btn my-2 my-sm-0 nav_search-btn" type="submit">
-                    <i class="fa fa-search" aria-hidden="true"></i>
-                  </button>
-                </form>
               </div>
             </div>
           </nav>
@@ -119,7 +109,7 @@
         </div>
         <div class="mt-4 d-flex gap-2">
           <a href="index.html" class="btn btn-black">Voltar ao Dashboard</a>
-          <a id="editarBtn" href="#" class="btn btn-primary">Editar Laudo</a>
+          <a id="editarBtn" href="#" class="btn btn-black">Editar Caso</a>
           <a id="visualizarEvidenciasBtn" href="#" class="btn btn-black"><i class="bi bi-eye"></i> Visualizar Evidências</a>
           <button id="excluirBtn" class="btn btn-danger" onclick="excluirCaso()">Excluir Laudo</button>
         </div>
@@ -135,7 +125,6 @@
             </div>
             <div class="modal-body">
               <label for="statusSelect" class="form-label">Novo Status</label>
-              <br>
               <select class="form-select" id="statusSelect">
                 <option value="Em andamento">Em andamento</option>
                 <option value="Finalizado">Finalizado</option>
@@ -177,7 +166,7 @@
               </a>
               <a href="">
                 <i class="fa fa-envelope"></i>
-                <span><span class="__cf_email__" data-cfemail="efccc0c1dbcedbc0efcdc4d9ced8c8c6c981ccc0c2">[email protected]</span></span>
+                <span>contato@forescan.com</span>
               </a>
             </div>
             <div class="social_box">
@@ -213,6 +202,9 @@
   <script src="js/custom.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
+      // Set footer year
+      document.getElementById('displayYear').textContent = new Date().getFullYear();
+
       const dbPromise = idb.openDB('forescanDB', 1, {
         upgrade(db) {
           if (!db.objectStoreNames.contains('laudos')) {
@@ -348,7 +340,5 @@
       }
     });
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9342d038ec137b98',t:'MTc0NTMwMDcwOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'935daffa9d1b4587',t:'MTc0NTU4MjUwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
