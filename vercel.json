@@ -1,0 +1,5 @@
+{
+    "rewrites": [
+      { "source": "/laudos.html(.*)", "destination": "/laudos.html" }
+    ]
+  }

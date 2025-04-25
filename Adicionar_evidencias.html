@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forescan - Gerenciar Evidências</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="css/font-awesome.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/css/nice-select.min.css" integrity="sha256-mLBIhmBvigTFWPSCtvdu6a76T+3Xyt+K571hupeFLg4=" crossorigin="anonymous">
+  <link href="css/style.css" rel="stylesheet">
+  <link href="css/responsive.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="sub_page">
+  <div class="hero_area">
+    <header class="header_section">
+      <div class="header_top">
+        <div class="container">
+          <div class="contact_nav">
+            <a href=""><i class="fa fa-phone" aria-hidden="true"></i><span>Ligue: (81) 99999-7632</span></a>
+            <a href=""><i class="fa fa-envelope" aria-hidden="true"></i><span>Email: <span class="__cf_email__" data-cfemail="9af9f5f4eefbeef5dafcf5e8ffe9f9fbf4b4f9f5f7">[email protected]</span></span></a>
+            <a href=""><i class="fa fa-map-marker" aria-hidden="true"></i><span>Recife - PE</span></a>
+          </div>
+        </div>
+      </div>
+      <div class="header_bottom">
+        <div class="container-fluid">
+          <nav class="navbar navbar-expand-lg custom_nav-container ">
+            <a class="navbar-brand" href="index.html">
+              <img src="images/Logo.png" alt="Logo da Forescan" class="logo-img">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class=""></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <div class="d-flex mr-auto flex-column flex-lg-row align-items-center">
+                <ul class="navbar-nav">
+                  <li class="nav-item"><a class="nav-link" href="index.html">Dashboard</a></li>
+                  <li class="nav-item"><a class="nav-link" href="Adicionar_casos.html">Adicionar caso</a></li>
+                  <li class="nav-item"><a class="nav-link" href="Gerenciar_usuarios.html">Gerenciar Usuários</a></li>
+                </ul>
+              </div>
+            </div>
+          </nav>
+        </div>
+      </div>
+    </header>
+  </div>
+
+  <section class="layout_padding">
+    <div class="container">
+      <div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+        <div id="toastContainer"></div>
+      </div>
+      <h2 class="mb-4">Gerenciar Evidências</h2>
+      <form id="formEvidencia" class="needs-validation" novalidate>
+        <div class="mb-3">
+          <label for="tituloEvidencia" class="form-label">Título da Evidência</label>
+          <input type="text" class="form-control" id="tituloEvidencia" required>
+          <div class="invalid-feedback">O título da evidência é obrigatório.</div>
+        </div>
+        <div class="mb-3">
+          <label for="descricaoEvidencia" class="form-label">Descrição da Evidência</label>
+          <textarea class="form-control" id="descricaoEvidencia" rows="3" required></textarea>
+          <div class="invalid-feedback">A descrição da evidência é obrigatória.</div>
+        </div>
+        <div class="mb-3">
+          <label for="fotoEvidencia" class="form-label">Adicionar Foto (opcional)</label>
+          <div class="d-flex align-items-center gap-2">
+            <input type="file" class="form-control d-none" id="fotoEvidencia" accept="image/*">
+            <button type="button" class="btn btn-black" onclick="document.getElementById('fotoEvidencia').click()">
+              <i class="bi bi-upload"></i> Escolher Foto
+            </button>
+            <button type="button" class="btn btn-danger" id="clearPhotoEvidencia">
+              <i class="bi bi-trash"></i> Limpar Foto
+            </button>
+            <span id="file-name-evidencia" class="ms-2">Nenhuma foto selecionada</span>
+          </div>
+        </div>
+        <input type="hidden" id="editIndex">
+        <input type="hidden" id="casoId">
+        <div class="button-container d-flex gap-2">
+          <button type="submit" class="btn btn-black">Salvar Evidência</button>
+          <button type="button" class="btn btn-secondary" id="cancelEditEvidencia" style="display: none;" onclick="cancelarEdicao()">Cancelar Edição</button>
+        </div>
+      </form>
+      <h3 class="mt-5">Evidências do Caso</h3>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Descrição</th>
+              <th>Foto</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="evidenciasTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="info_section">
+    <div class="container">
+      <div class="info_top">
+        <div class="info_form">
+          <form action="">
+            <input type="email" placeholder="Your email">
+            <button>Subscribe</button>
+          </form>
+        </div>
+      </div>
+      <div class="info_bottom layout_padding2">
+        <div class="row info_main_row">
+          <div class="col-md-6 col-lg-3">
+            <h5>Endereço</h5>
+            <div class="info_contact">
+              <a href=""><i class="fa fa-map-marker" aria-hidden="true"></i><span>Recife - PE</span></a>
+              <a href=""><i class="fa fa-phone" aria-hidden="true"></i><span>Ligue (81) 99999-7632</span></a>
+              <a href=""><i class="fa fa-envelope"></i><span><span class="__cf_email__" data-cfemail="afccc0c1dbcedbc0efc9c0ddcadccccec181ccc0c2">[email protected]</span></span></a>
+            </div>
+            <div class="social_box">
+              <a href=""><i class="fa fa-facebook" aria-hidden="true"></i></a>
+              <a href=""><i class="fa fa-twitter" aria-hidden="true"></i></a>
+              <a href=""><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+              <a href=""><i class="fa fa-instagram" aria-hidden="true"></i></a>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3">
+            <div class="info_links">
+              <h5>Links Úteis</h5>
+              <div class="info_links_menu">
+                <a href="index.html">Dashboard</a>
+                <a href="Adicionar_casos.html">Adicionar casos</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  <footer class="footer_section">
+    <div class="container">
+      <p>© <span id="displayYear"></span></p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/idb@7.0.0/build/umd.js"></script>
+  <script src="js/jquery-3.4.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/js/jquery.nice-select.min.js"></script>
+  <script src="js/custom.js"></script>
+  <script>
+// Função para carregar as evidências do caso
+function loadEvidencias(casoId) {
+  const evidenciasTable = document.getElementById('evidenciasTable');
+  const dbPromise = idb.open('forescanDB', 1);
+  dbPromise.then(db => {
+    const tx = db.transaction('evidencias', 'readonly');
+    const store = tx.objectStore('evidencias');
+    const index = store.index('casoId');
+    return index.getAll(casoId);
+  }).then(evidencias => {
+    evidenciasTable.innerHTML = '';
+    evidencias.forEach(evidencia => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${evidencia.titulo}</td>
+        <td>${evidencia.descricao}</td>
+        <td>${evidencia.foto ? '<img src="' + evidencia.foto + '" alt="Foto" width="50">' : 'Nenhuma'}</td>
+        <td class="actions-column">
+          <button class="btn btn-primary btn-sm edit-evidencia" data-id="${evidencia.id}">Editar</button>
+          <button class="btn btn-danger btn-sm delete-evidencia" data-id="${evidencia.id}">Excluir</button>
+        </td>
+      `;
+      evidenciasTable.appendChild(row);
+    });
+  }).catch(error => {
+    console.error('Erro ao carregar evidências:', error);
+    mostrarToast('Erro ao carregar as evidências.', 'danger');
+  });
+}
+
+// Função para excluir uma evidência
+function deleteEvidenciaFromDB(id, casoId) {
+  const dbPromise = idb.open('forescanDB', 1);
+  dbPromise.then(db => {
+    const tx = db.transaction('evidencias', 'readwrite');
+    tx.objectStore('evidencias').delete(id);
+    return tx.complete;
+  }).then(() => {
+    console.log('Evidência excluída com sucesso');
+    mostrarToast('Evidência excluída com sucesso!', 'success');
+    loadEvidencias(casoId);
+  }).catch(error => {
+    console.error('Erro ao excluir evidência:', error);
+    mostrarToast('Erro ao excluir a evidência.', 'danger');
+  });
+}
+
+// Função para salvar uma evidência
+function salvarEvidencia(event) {
+  event.preventDefault(); // Evita o comportamento padrão de submissão
+
+  const form = document.getElementById('formEvidencia');
+  const casoId = document.getElementById('casoId').value;
+  const titulo = document.getElementById('tituloEvidencia').value;
+  const descricao = document.getElementById('descricaoEvidencia').value;
+  const fotoInput = document.getElementById('fotoEvidencia');
+  const editIndex = document.getElementById('editIndex').value;
+
+  // Validação do formulário
+  if (!form.checkValidity()) {
+    form.classList.add('was-validated');
+    return;
+  }
+
+  // Validação do casoId
+  if (!casoId) {
+    mostrarToast('Nenhum caso selecionado. Por favor, selecione um caso.', 'danger');
+    return;
+  }
+
+  // Preparar objeto da evidência
+  const evidencia = {
+    casoId: casoId,
+    titulo: titulo,
+    descricao: descricao,
+    foto: null
+  };
+
+  // Processar a foto, se houver
+  if (fotoInput.files.length > 0) {
+    const file = fotoInput.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      evidencia.foto = e.target.result; // Armazena a foto como Data URL
+      salvarNoBanco(evidencia, editIndex, casoId);
+    };
+    reader.readAsDataURL(file);
+  } else {
+    salvarNoBanco(evidencia, editIndex, casoId);
+  }
+}
+
+// Função auxiliar para salvar no IndexedDB
+function salvarNoBanco(evidencia, editIndex, casoId) {
+  const dbPromise = idb.open('forescanDB', 1);
+  dbPromise.then(db => {
+    const tx = db.transaction('evidencias', 'readwrite');
+    const store = tx.objectStore('evidencias');
+    if (editIndex) {
+      evidencia.id = parseInt(editIndex); // Mantém o ID para edição
+      store.put(evidencia); // Atualiza a evidência existente
+    } else {
+      store.add(evidencia); // Adiciona nova evidência
+    }
+    return tx.complete;
+  }).then(() => {
+    console.log('Evidência salva com sucesso');
+    mostrarToast('Evidência salva com sucesso!', 'success');
+    document.getElementById('formEvidencia').reset(); // Limpa o formulário
+    document.getElementById('formEvidencia').classList.remove('was-validated');
+    document.getElementById('file-name-evidencia').textContent = 'Nenhuma foto selecionada';
+    document.getElementById('editIndex').value = ''; // Limpa o índice de edição
+    document.getElementById('cancelEditEvidencia').style.display = 'none'; // Esconde o botão de cancelar
+    loadEvidencias(casoId); // Recarrega a tabela
+  }).catch(error => {
+    console.error('Erro ao salvar evidência:', error);
+    mostrarToast('Erro ao salvar a evidência.', 'danger');
+  });
+}
+
+// Event listener para capturar cliques nos botões de excluir
+document.getElementById('evidenciasTable').addEventListener('click', function(event) {
+  if (event.target.classList.contains('delete-evidencia')) {
+    const id = event.target.getAttribute('data-id');
+    const casoId = document.getElementById('casoId').value;
+    if (!casoId) {
+      mostrarToast('Nenhum caso selecionado. Por favor, selecione um caso.', 'danger');
+      return;
+    }
+    if (confirm('Tem certeza que deseja excluir esta evidência?')) {
+      deleteEvidenciaFromDB(id, casoId);
+    }
+  }
+});
+
+// Event listener para submissão do formulário
+document.getElementById('formEvidencia').addEventListener('submit', salvarEvidencia);
+
+// Carregar evidências ao iniciar a página
+document.addEventListener('DOMContentLoaded', () => {
+  const casoId = document.getElementById('casoId').value || new URLSearchParams(window.location.search).get('casoId');
+  if (casoId) {
+    document.getElementById('casoId').value = decodeURIComponent(casoId);
+    loadEvidencias(casoId);
+  } else {
+    console.error('ID do caso não encontrado');
+    mostrarToast('Nenhum caso selecionado. Por favor, selecione um caso.', 'danger');
+  }
+
+  // Atualizar o nome do arquivo ao selecionar uma foto
+  document.getElementById('fotoEvidencia').addEventListener('change', function() {
+    const fileName = this.files.length > 0 ? this.files[0].name : 'Nenhuma foto selecionada';
+    document.getElementById('file-name-evidencia').textContent = fileName;
+  });
+
+  // Limpar a foto ao clicar no botão "Limpar Foto"
+  document.getElementById('clearPhotoEvidencia').addEventListener('click', function() {
+    document.getElementById('fotoEvidencia').value = '';
+    document.getElementById('file-name-evidencia').textContent = 'Nenhuma foto selecionada';
+  });
+});

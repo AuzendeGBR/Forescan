@@ -1,0 +1,162 @@
+/* Fundo da página de login (mantido do login.css original) */
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Estilização do card de login */
+  .login-card {
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    padding: 4rem;
+    max-width: 800px; /* Mantido para acomodar campos de 600px + padding */
+    width: 100%;
+    margin: 0 auto;
+  }
+  
+  /* Título do card */
+  .login-card h2 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    font-size: 2.8rem;
+    color: #172C66; /* Ajustado para a cor predominante do tema */
+    margin-bottom: 2.5rem;
+    text-align: center;
+  }
+  
+  /* Labels dos campos (usando estilo do style.css para consistência) */
+  .login-card .form-label {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    font-size: 1.2rem;
+    color: #172C66; /* Ajustado para a cor predominante */
+    text-align: center;
+    display: block;
+  }
+  
+  /* Campos de entrada com ícones */
+  .input-group {
+    position: relative;
+    margin-bottom: 2.5rem;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .input-group .form-control {
+    padding-left: 3.5rem; /* Espaço para o ícone */
+    width: 100%;
+    max-width: 600px; /* Mantido para corresponder ao "Nome do Caso" */
+  }
+  
+  /* Ícone nos campos */
+  .input-group .input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #172C66; /* Ajustado para a cor predominante */
+    font-size: 1.5rem;
+  }
+  
+  /* Feedback de validação */
+  .invalid-feedback {
+    font-size: 0.95rem;
+    color: #dc3545; /* Cor padrão de erro do Bootstrap */
+    text-align: center;
+  }
+  
+  /* Estilização dos toasts (mantido para consistência com o projeto) */
+  .toast {
+    border-radius: 8px;
+    border-left: 5px solid;
+  }
+  
+  .toast .toast-header {
+    background-color: #f8f9fa;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+  }
+  
+  .toast .toast-body {
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.95rem;
+  }
+  
+  .toast-success {
+    border-left-color: #28a745;
+  }
+  
+  .toast-danger {
+    border-left-color: #dc3545;
+  }
+  
+  .toast-warning {
+    border-left-color: #ffc107;
+  }
+  
+  /* Responsividade */
+  @media (max-width: 768px) {
+    .login-card {
+      padding: 3rem;
+      max-width: 90%;
+      margin: 1rem;
+    }
+  
+    .login-card h2 {
+      font-size: 2.2rem;
+    }
+  
+    .login-card .form-label {
+      font-size: 1.1rem;
+    }
+  
+    .input-group .form-control {
+      font-size: 1.1rem;
+      height: 50px;
+      max-width: 100%; /* Ajustado para ocupar o espaço disponível */
+    }
+  
+    .input-group .input-icon {
+      font-size: 1.3rem;
+      left: 12px;
+    }
+  
+    .btn-black {
+      padding: 0.85rem 2.5rem;
+      font-size: 1.2rem;
+      max-width: 300px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .login-card {
+      padding: 2.5rem;
+      max-width: 95%;
+    }
+  
+    .login-card h2 {
+      font-size: 2rem;
+    }
+  
+    .login-card .form-label {
+      font-size: 1rem;
+    }
+  
+    .input-group .form-control {
+      font-size: 1rem;
+      height: 45px;
+    }
+  
+    .input-group .input-icon {
+      font-size: 1.2rem;
+    }
+  
+    .btn-black {
+      padding: 0.75rem 2rem;
+      font-size: 1.1rem;
+      max-width: 250px;
+    }
+  }
