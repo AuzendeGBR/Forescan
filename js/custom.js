@@ -1,28 +1,34 @@
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('custom.js carregado com sucesso'); // Log para verificar carregamento
+  console.log('custom.js carregado com sucesso');
 
-  // Função para mostrar toast
   function mostrarToast(mensagem, tipo = 'success') {
     const toastContainer = document.getElementById('toastContainer');
     if (!toastContainer) return;
     const toastId = `toast-${Date.now()}`;
+    let toastClass = 'text-bg-success';
+    if (tipo === 'danger') toastClass = 'text-bg-danger';
+    else if (tipo === 'warning') toastClass = 'text-bg-warning';
+    
     const toastHTML = `
-      <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="3000">
-        <div class="toast-header">
-          <strong class="me-auto">Notificação</strong>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Fechar"></button>
+      <div id="${toastId}" class="toast align-items-center ${toastClass} border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="3000">
+        <div class="d-flex">
+          <div class="toast-body">${mensagem}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
         </div>
-        <div class="toast-body">${mensagem}</div>
       </div>
     `;
-    toastContainer.innerHTML += toastHTML;
+    toastContainer.insertAdjacentHTML('beforeend', toastHTML);
     const toastElement = document.getElementById(toastId);
-    const toast = new bootstrap.Toast(toastElement);
-    toast.show();
+    if(bootstrap && bootstrap.Toast) { // Checa se Bootstrap está carregado
+        const toast = new bootstrap.Toast(toastElement);
+        toast.show();
+    } else {
+        console.error("Bootstrap Toast não pôde ser inicializado.");
+        toastElement.classList.add('show'); // Fallback simples
+    }
     toastElement.addEventListener('hidden.bs.toast', () => toastElement.remove());
   }
 
-  // Atualizar ano no footer
   function getYear() {
     const currentYear = new Date().getFullYear();
     const displayYear = document.querySelector('#displayYear');
@@ -30,23 +36,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   getYear();
 
-  // Inicializar niceSelect
   try {
-    $('select').niceSelect();
+    // Inicializa niceSelect para selects que não são para filtros de gráficos dinâmicos inicialmente
+    // Os selects dinâmicos ou específicos de gráficos serão inicializados/atualizados em suas respectivas lógicas
+    $('select:not(#periodoEvolucao):not(#filtroPerito):not(#filtroTipoCrimeTabela):not(.status-select)').niceSelect();
   } catch (err) {
-    console.error('Erro ao inicializar niceSelect:', err);
+    console.error('Erro ao inicializar niceSelect geral:', err);
   }
 
-  // Verificação de autenticação
   function verificarAutenticacao() {
     if (window.location.pathname.includes('Login.html')) return;
-
     const usuarioLogado = localStorage.getItem('usuarioLogado');
     if (!usuarioLogado) {
       window.location.href = 'Login.html';
       return;
     }
-
     try {
       const usuario = JSON.parse(usuarioLogado);
       if (window.location.pathname.includes('Gerenciar_usuarios.html') && usuario.tipo !== 'Administrador') {
@@ -54,20 +58,17 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => window.location.href = 'index.html', 1000);
         return;
       }
-
       const gerenciarUsuariosLink = document.querySelector('a[href="Gerenciar_usuarios.html"]');
       if (gerenciarUsuariosLink && usuario.tipo !== 'Administrador') {
         const navItem = gerenciarUsuariosLink.closest('.nav-item');
         if (navItem) navItem.style.display = 'none';
       }
-
       const navbarMenu = document.querySelector('.navbar-nav');
-      if (navbarMenu && usuarioLogado) {
+      if (navbarMenu && !document.querySelector('.user-greeting-item')) {
         const userItem = document.createElement('li');
-        userItem.className = 'nav-item';
+        userItem.className = 'nav-item user-greeting-item';
         userItem.innerHTML = `<span class="nav-link">Olá, ${usuario.nome}</span>`;
         navbarMenu.appendChild(userItem);
-
         const logoutItem = document.createElement('li');
         logoutItem.className = 'nav-item';
         logoutItem.innerHTML = '<a class="nav-link" href="#" onclick="logout()">Logout</a>';
@@ -86,104 +87,182 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = 'Login.html';
   };
 
-  // Inicializar IndexedDB apenas nas páginas necessárias
   let dbPromise = null;
   const paginasQueUsamIndexedDB = ['index.html', 'Adicionar_casos.html', 'Laudos.html'];
-  if (paginasQueUsamIndexedDB.some(pagina => window.location.pathname.includes(pagina))) {
+  if (paginasQueUsamIndexedDB.some(pagina => window.location.pathname.includes(pagina) || window.location.pathname === '/' || window.location.pathname.endsWith('/forescan/'))) {
     try {
       dbPromise = idb.openDB('forescanDB', 1, {
         upgrade(db) {
           if (!db.objectStoreNames.contains('laudos')) {
             db.createObjectStore('laudos', { keyPath: 'id' });
           }
+          if (!db.objectStoreNames.contains('evidencias')) {
+             const evidenciasStore = db.createObjectStore('evidencias', { keyPath: 'id', autoIncrement:true });
+             evidenciasStore.createIndex('casoId', 'casoId');
+          }
+           if (!db.objectStoreNames.contains('photos')) {
+            db.createObjectStore('photos', { keyPath: 'id' });
+          }
         }
       });
-      console.log('IndexedDB inicializado com sucesso.');
+      console.log('IndexedDB inicializado.');
     } catch (err) {
       console.error('Erro ao inicializar IndexedDB:', err);
       mostrarToast('Erro ao inicializar o banco de dados.', 'danger');
     }
   }
 
-  // Lógica específica por página
   if (window.location.pathname.includes('Login.html')) {
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
       loginForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        console.log('Formulário de login submetido.');
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
         const email = emailInput.value.trim();
         const password = passwordInput.value.trim();
-
         let isValid = true;
-        if (!email) {
-          emailInput.classList.add('is-invalid');
-          isValid = false;
-        } else {
-          emailInput.classList.remove('is-invalid');
-        }
-        if (!password) {
-          passwordInput.classList.add('is-invalid');
-          isValid = false;
-        } else {
-          passwordInput.classList.remove('is-invalid');
-        }
-
-        if (!isValid) {
-          mostrarToast('Preencha todos os campos.', 'warning');
-          console.log('Validação do formulário falhou: campos obrigatórios não preenchidos.');
-          return;
-        }
-
+        if (!email) { emailInput.classList.add('is-invalid'); isValid = false; } 
+        else { emailInput.classList.remove('is-invalid'); }
+        if (!password) { passwordInput.classList.add('is-invalid'); isValid = false; } 
+        else { passwordInput.classList.remove('is-invalid'); }
+        if (!isValid) { mostrarToast('Preencha todos os campos.', 'warning'); return; }
         let users = [];
         try {
           const usersRaw = localStorage.getItem('users');
           users = usersRaw ? JSON.parse(usersRaw) : [];
-          if (!Array.isArray(users)) {
-            console.warn('Dados de usuários corrompidos. Inicializando como array vazio.');
-            users = [];
-            localStorage.setItem('users', JSON.stringify(users));
-          }
-        } catch (err) {
-          console.error('Erro ao parsear users do localStorage:', err);
-          mostrarToast('Erro ao acessar os dados de usuários.', 'danger');
-          return;
-        }
-
+          if (!Array.isArray(users)) { users = []; localStorage.setItem('users', JSON.stringify(users));}
+        } catch (err) { mostrarToast('Erro ao acessar os dados de usuários.', 'danger'); return; }
         const user = users.find(u => u.email === email && u.senha === password);
         if (user) {
-          console.log('Usuário encontrado:', user);
-          localStorage.setItem('usuarioLogado', JSON.stringify({
-            id: user.email,
-            nome: user.nome,
-            tipo: user.tipo,
-            email: user.email
-          }));
+          localStorage.setItem('usuarioLogado', JSON.stringify({ id: user.email, nome: user.nome, tipo: user.tipo, email: user.email }));
           mostrarToast('Login realizado com sucesso!', 'success');
           setTimeout(() => window.location.href = 'index.html', 1000);
         } else {
-          console.log('Credenciais inválidas:', { email, password });
           mostrarToast('Email ou senha incorretos.', 'danger');
         }
       });
-    } else {
-      console.error('Elemento #loginForm não encontrado.');
     }
   }
 
-  if (window.location.pathname.includes('index.html')) {
-    const totalLaudos = document.getElementById('totalLaudos');
-    const laudosHoje = document.getElementById('laudosHoje');
-    const peritoAtivo = document.getElementById('peritoAtivo');
-    const peritoChart = document.getElementById('peritoChart');
-    const laudosTable = document.getElementById('laudosTable');
-    const filtroData = document.getElementById('filtroData');
-    const filtroPerito = document.getElementById('filtroPerito');
-    const filtroNomeCaso = document.getElementById('filtroNomeCaso');
-    const paginationNumbers = document.getElementById('paginationNumbers');
-    const laudosCarousel = document.getElementById('laudosCarousel');
+  if (window.location.pathname.includes('Adicionar_casos.html')) {
+    const formLaudo = document.getElementById('formLaudo');
+    const nomeCasoInput = document.getElementById('nomeCaso');
+    let errorDiv = nomeCasoInput ? nomeCasoInput.parentNode.querySelector('.invalid-feedback') : null;
+    if (nomeCasoInput && !errorDiv) {
+        errorDiv = document.createElement('div'); errorDiv.className = 'invalid-feedback';
+        nomeCasoInput.parentNode.appendChild(errorDiv);
+    }
+    
+    try {
+        $('#peritoNome').niceSelect(); $('#statusCaso').niceSelect();
+        $('#tipoCrime').niceSelect(); $('#etniaVitima').niceSelect();
+    } catch(e) { console.warn("NiceSelect não aplicado em Adicionar_casos.html:", e); }
+
+    async function validarNomeCaso(nomeCaso, casoId = null) {
+      if (!nomeCaso || nomeCaso.trim() === '') return 'O Nome do Caso é obrigatório.';
+      const regex = /^[a-zA-Z0-9\s._-]{3,}$/;
+      if (!regex.test(nomeCaso)) return 'Nome do Caso: min 3 caracteres (letras, números, espaços, . _ -).';
+      if(!dbPromise) return "Erro de banco de dados.";
+      try {
+        const db = await dbPromise; const allCasos = await db.getAll('laudos');
+        const exists = allCasos.some(c => c.nomeCaso && c.nomeCaso.toLowerCase() === nomeCaso.toLowerCase() && c.id !== casoId);
+        if (exists) return 'O Nome do Caso já existe.';
+        return null;
+      } catch (err) { return 'Erro ao validar o nome do caso.'; }
+    }
+
+    function limparFormulario() {
+      if (formLaudo) {
+        formLaudo.reset();
+        if(nomeCasoInput) nomeCasoInput.classList.remove('is-invalid');
+        if(errorDiv) errorDiv.textContent = '';
+        $('#peritoNome').val($('#peritoNome option:first').val());
+        $('#statusCaso').val('Em andamento');
+        $('#tipoCrime').val($('#tipoCrime option:first').val());
+        $('#etniaVitima').val($('#etniaVitima option:first').val());
+        try {
+          $('#peritoNome').niceSelect('update'); $('#statusCaso').niceSelect('update');
+          $('#tipoCrime').niceSelect('update'); $('#etniaVitima').niceSelect('update');
+        } catch (err) { console.error('Erro ao atualizar niceSelect (limpar):', err); }
+      }
+    }
+
+    if (formLaudo) {
+      formLaudo.addEventListener('submit', async e => {
+        e.preventDefault();
+        const nomeCaso = nomeCasoInput.value.trim();
+        const idParam = new URLSearchParams(window.location.search).get('id');
+        const casoId = idParam || Date.now().toString();
+        const error = await validarNomeCaso(nomeCaso, idParam ? casoId : null);
+        if (error) {
+          nomeCasoInput.classList.add('is-invalid'); if(errorDiv) errorDiv.textContent = error;
+          formLaudo.classList.add('was-validated'); return;
+        } else {
+          nomeCasoInput.classList.remove('is-invalid'); if(errorDiv) errorDiv.textContent = '';
+        }
+        if (!formLaudo.checkValidity()) {
+            e.stopPropagation(); formLaudo.classList.add('was-validated');
+            mostrarToast('Por favor, preencha todos os campos obrigatórios.', 'warning'); return;
+        }
+        const caso = {
+          id: casoId, nomeCaso, data: $('#dataPericia').val(), perito: $('#peritoNome').val(),
+          status: $('#statusCaso').val(), tipoCrime: $('#tipoCrime').val(),
+          idadeVitima: $('#idadeVitima').val() ? parseInt($('#idadeVitima').val(),10) : null,
+          etniaVitima: $('#etniaVitima').val(), latitude: $('#latitude').val().trim()||null,
+          longitude: $('#longitude').val().trim()||null, descricao: $('#exameDescricao').val(),
+          observacoes: $('#observacoes').val(), fotos: []
+        };
+        if (!dbPromise) { mostrarToast('Erro: Conexão com banco de dados não estabelecida.', 'danger'); return; }
+        try {
+          const db = await dbPromise; await db.put('laudos', caso);
+          mostrarToast(`Caso ${idParam ? 'atualizado':'salvo'} com sucesso!`, 'success');
+          if (!idParam) limparFormulario();
+          setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+        } catch (err) { mostrarToast('Erro ao salvar o caso.', 'danger'); }
+      });
+      const urlParams = new URLSearchParams(window.location.search);
+      const casoIdParam = urlParams.get('id');
+      if (casoIdParam) {
+        (async () => {
+          if (!dbPromise) { mostrarToast('Erro de BD ao carregar.', 'danger'); return; }
+          try {
+            const db = await dbPromise; const caso = await db.get('laudos', casoIdParam);
+            if (caso) {
+              $('#nomeCaso').val(caso.nomeCaso||''); $('#dataPericia').val(caso.data||'');
+              $('#peritoNome').val(caso.perito||''); $('#statusCaso').val(caso.status||'Em andamento');
+              $('#tipoCrime').val(caso.tipoCrime||''); $('#idadeVitima').val(caso.idadeVitima||'');
+              $('#etniaVitima').val(caso.etniaVitima||''); $('#latitude').val(caso.latitude||'');
+              $('#longitude').val(caso.longitude||''); $('#exameDescricao').val(caso.descricao||'');
+              $('#observacoes').val(caso.observacoes||''); $('#casoId').val(casoIdParam);
+              try {
+                $('#peritoNome').niceSelect('update'); $('#statusCaso').niceSelect('update');
+                $('#tipoCrime').niceSelect('update'); $('#etniaVitima').niceSelect('update');
+              } catch (err) { console.error('Erro ao atualizar niceSelect (edição):', err); }
+            } else { mostrarToast('Caso não encontrado para edição.', 'warning'); }
+          } catch (err) { mostrarToast('Erro ao carregar o caso para edição.', 'danger'); }
+        })();
+      }
+    }
+  }
+
+  if (window.location.pathname.includes('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/forescan/')) {
+    const totalLaudosEl = document.getElementById('totalLaudos');
+    const laudosHojeEl = document.getElementById('laudosHoje');
+    const peritoAtivoEl = document.getElementById('peritoAtivo');
+    const peritoChartCanvas = document.getElementById('peritoChart');
+    const laudosTableBody = document.getElementById('laudosTable');
+    const filtroDataInicioEl = document.getElementById('filtroDataInicio');
+    const filtroDataFimEl = document.getElementById('filtroDataFim');
+    const filtroPeritoEl = document.getElementById('filtroPerito');
+    const filtroNomeCasoEl = document.getElementById('filtroNomeCaso');
+    const filtroTipoCrimeTabelaEl = document.getElementById('filtroTipoCrimeTabela');
+    const paginationNumbersEl = document.getElementById('paginationNumbers');
+    const dataInicioEvolucaoEl = document.getElementById('dataInicioEvolucao');
+    const dataFimEvolucaoEl = document.getElementById('dataFimEvolucao');
+    const periodoEvolucaoSelect = document.getElementById('periodoEvolucao');
+    const limparFiltroEvolucaoBtn = document.getElementById('limparFiltroEvolucao');
+    const filtrarGraficoEvolucaoBtn = document.getElementById('filtrarGraficoEvolucao');
 
     let casos = [];
     const casosPorPagina = 5;
@@ -191,784 +270,498 @@ document.addEventListener('DOMContentLoaded', () => {
     let filtrosAtuais = {};
 
     async function carregarCasos() {
-      if (!dbPromise) {
-        console.error('dbPromise não inicializado.');
-        mostrarToast('Erro ao acessar o banco de dados.', 'danger');
-        return;
-      }
+      if (!dbPromise) { mostrarToast('Erro ao acessar BD.', 'danger'); return; }
       try {
-        const db = await dbPromise;
-        casos = await db.getAll('laudos');
-        casos = casos.map((caso, index) => ({
-          ...caso,
-          nomeCaso: caso.nomeCaso || caso.paciente || `Caso_${index + 1}`,
-          paciente: undefined,
-          fotos: caso.fotos || [],
-          status: caso.status || 'Em andamento'
-        }));
-        console.log('Casos carregados do IndexedDB:', casos);
+        const db = await dbPromise; casos = await db.getAll('laudos');
+        casos = casos.map((c,i)=>({...c, nomeCaso:c.nomeCaso||`Caso_${i+1}`, status:c.status||'Em andamento', tipoCrime:c.tipoCrime||'Não Especificado', etniaVitima:c.etniaVitima||'Não Informada'}));
+        console.log('Casos carregados:', casos.length);
+        popularFiltroTipoCrimeTabela(); // Popula o novo filtro
         atualizarTabela();
         atualizarEstatisticas();
-        if (laudosCarousel) atualizarCasos();
-      } catch (err) {
-        console.error('Erro ao carregar casos:', err);
-        mostrarToast('Erro ao carregar os casos.', 'danger');
-      }
+        prepararDadosParaMapa(); // Prepara dados para o mapa (placeholder)
+      } catch (err) { mostrarToast('Erro ao carregar casos.', 'danger');}
     }
-    carregarCasos();
+    if(totalLaudosEl) { carregarCasos(); }
+
+    function popularFiltroTipoCrimeTabela() {
+        if (!filtroTipoCrimeTabelaEl || !casos || casos.length === 0) return;
+        const tiposDeCrime = [...new Set(casos.map(c => c.tipoCrime).filter(Boolean))].sort();
+        filtroTipoCrimeTabelaEl.innerHTML = '<option value="">Todos os Tipos</option>'; // Opção padrão
+        tiposDeCrime.forEach(tipo => {
+            const option = document.createElement('option');
+            option.value = tipo;
+            option.textContent = tipo;
+            filtroTipoCrimeTabelaEl.appendChild(option);
+        });
+        try { $(filtroTipoCrimeTabelaEl).niceSelect('update'); } catch(e) { console.warn("NiceSelect para filtroTipoCrimeTabela falhou.");}
+    }
 
     function atualizarTabela(filtros = filtrosAtuais, pagina = paginaAtual) {
-      if (!laudosTable || !paginationNumbers) {
-        console.error('Elementos laudosTable ou paginationNumbers não encontrados.');
-        return;
-      }
-      console.log('Atualizando tabela com filtros:', filtros, 'e página:', pagina); // Log para depuração
-      laudosTable.innerHTML = '';
+      if (!laudosTableBody || !paginationNumbersEl) return;
       let casosFiltrados = [...casos];
-
-      if (filtros.data) casosFiltrados = casosFiltrados.filter(c => c.data === filtros.data);
+      if (filtros.dataInicio && filtros.dataFim) casosFiltrados = casosFiltrados.filter(c => c.data && c.data >= filtros.dataInicio && c.data <= filtros.dataFim);
+      else if (filtros.dataInicio) casosFiltrados = casosFiltrados.filter(c => c.data && c.data >= filtros.dataInicio);
+      else if (filtros.dataFim) casosFiltrados = casosFiltrados.filter(c => c.data && c.data <= filtros.dataFim);
       if (filtros.perito) casosFiltrados = casosFiltrados.filter(c => c.perito === filtros.perito);
-      if (filtros.nomeCaso) {
-        const termo = filtros.nomeCaso.toLowerCase();
-        casosFiltrados = casosFiltrados.filter(c => (c.nomeCaso || '').toLowerCase().includes(termo));
-      }
+      if (filtros.nomeCaso) casosFiltrados = casosFiltrados.filter(c => (c.nomeCaso||'').toLowerCase().includes(filtros.nomeCaso.toLowerCase()));
+      if (filtros.tipoCrimeTabela) casosFiltrados = casosFiltrados.filter(c => c.tipoCrime === filtros.tipoCrimeTabela); // Filtro por tipo de crime
 
-      const totalCasos = casosFiltrados.length;
-      const totalPaginas = Math.ceil(totalCasos / casosPorPagina);
-      pagina = Math.max(1, Math.min(pagina, totalPaginas));
-      paginaAtual = pagina;
-
-      const inicio = (pagina - 1) * casosPorPagina;
-      const fim = inicio + casosPorPagina;
+      const totalCasosFiltrados = casosFiltrados.length;
+      const totalPaginas = Math.ceil(totalCasosFiltrados / casosPorPagina) || 1;
+      pagina = Math.max(1, Math.min(pagina, totalPaginas)); paginaAtual = pagina;
+      const inicio = (pagina - 1) * casosPorPagina; const fim = inicio + casosPorPagina;
       const casosPaginados = casosFiltrados.slice(inicio, fim);
-
+      laudosTableBody.innerHTML = '';
       const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
       const tipoUsuario = usuarioLogado.tipo || null;
-      const podeEditar = tipoUsuario === 'Administrador' || tipoUsuario === 'Perito';
+      const podeEditarStatus = tipoUsuario === 'Administrador' || tipoUsuario === 'Perito';
       const podeExcluir = tipoUsuario === 'Administrador';
 
-      casosPaginados.forEach((caso, index) => {
-        const nomeCasoDisplay = caso.nomeCaso || 'N/A';
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${inicio + index + 1}</td>
-          <td>${nomeCasoDisplay}</td>
-          <td>${caso.data || 'N/A'}</td>
-          <td>${caso.perito || 'N/A'}</td>
-          <td>
-            ${podeEditar ? `
-              <select class="form-select status-select" data-caso-id="${caso.id}">
-                <option value="Em andamento" ${caso.status === 'Em andamento' ? 'selected' : ''}>Em andamento</option>
-                <option value="Finalizado" ${caso.status === 'Finalizado' ? 'selected' : ''}>Finalizado</option>
-                <option value="Arquivado" ${caso.status === 'Arquivado' ? 'selected' : ''}>Arquivado</option>
-              </select>
-            ` : caso.status || 'Em andamento'}
-          </td>
-          <td>
-            <a href="Adicionar_evidencias.html?casoId=${caso.id}" class="btn btn-black btn-sm"><i class="bi bi-plus-circle"></i> Adicionar</a>
-            <a href="Laudos.html?id=${caso.id}" class="btn btn-primary btn-sm">Visualizar</a>
-            ${podeExcluir ? `<button class="btn btn-danger btn-sm" onclick="excluirCaso('${caso.id}')">Excluir</button>` : ''}
-          </td>
-        `;
-        laudosTable.appendChild(row);
-      });
-
-      if (podeEditar) {
-        document.querySelectorAll('.status-select').forEach(select => {
-          select.addEventListener('change', async () => {
-            const casoId = select.dataset.casoId;
-            const newStatus = select.value;
-            try {
-              const db = await dbPromise;
-              const caso = await db.get('laudos', casoId);
-              if (caso) {
-                caso.status = newStatus;
-                await db.put('laudos', caso);
-                const index = casos.findIndex(c => c.id === casoId);
-                casos[index] = caso;
-                mostrarToast('Status atualizado com sucesso!', 'success');
-                atualizarTabela();
-              }
-            } catch (err) {
-              console.error('Erro ao atualizar status:', err);
-              mostrarToast('Erro ao atualizar o status.', 'danger');
-            }
-          });
+      if (casosPaginados.length === 0) {
+        const r = laudosTableBody.insertRow(); const c = r.insertCell(); c.colSpan = 7; c.textContent = "Nenhum caso encontrado."; c.style.textAlign = "center";
+      } else {
+        casosPaginados.forEach((caso, i) => {
+          const r = laudosTableBody.insertRow();
+          r.insertCell().textContent = inicio + i + 1;
+          r.insertCell().textContent = caso.nomeCaso || 'N/A';
+          r.insertCell().textContent = caso.data ? new Date(caso.data+'T00:00:00').toLocaleDateString() : 'N/A';
+          r.insertCell().textContent = caso.tipoCrime || 'N/A'; // Coluna Tipo Crime
+          r.insertCell().textContent = caso.perito || 'N/A';
+          const sC = r.insertCell();
+          if(podeEditarStatus){ const sel = document.createElement('select'); sel.className='form-select form-select-sm status-select'; sel.dataset.casoId=caso.id; ['Em andamento','Finalizado','Arquivado'].forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;if(caso.status===s)o.selected=true;sel.appendChild(o);});sC.appendChild(sel);} else {sC.textContent=caso.status||'Em andamento';}
+          const aC = r.insertCell();
+          aC.innerHTML = `<a href="Adicionar_evidencias.html?casoId=${caso.id}" class="btn btn-dark btn-sm" title="Evidências"><i class="bi bi-journal-plus"></i></a> <a href="Laudos.html?id=${caso.id}" class="btn btn-primary btn-sm" title="Visualizar"><i class="bi bi-eye-fill"></i></a> ${podeExcluir ? `<button class="btn btn-danger btn-sm" onclick="excluirCaso('${caso.id}')" title="Excluir"><i class="bi bi-trash-fill"></i></button>`:''}`;
         });
       }
-
-      paginationNumbers.innerHTML = '';
-      for (let i = 1; i <= totalPaginas; i++) {
-        const pageItem = document.createElement('li');
-        pageItem.className = `page-item ${i === pagina ? 'active' : ''}`;
-        pageItem.innerHTML = `<a class="page-link" href="#" onclick="irParaPagina(${i})">${i}</a>`;
-        paginationNumbers.appendChild(pageItem);
+      if (podeEditarStatus && casosPaginados.length > 0) {
+        try { document.querySelectorAll('.status-select').forEach(sel => { if (!$(sel).data('niceSelectAttached')) { $(sel).niceSelect(); $(sel).data('niceSelectAttached',true); $(sel).on('change', async function(){ const cId=this.dataset.casoId; const nS=this.value; try { const db=await dbPromise; const c=await db.get('laudos',cId); if(c){c.status=nS; await db.put('laudos',c); const iL=casos.findIndex(c=>c.id===cId); if(iL!==-1)casos[iL].status=nS; mostrarToast('Status atualizado!','success'); atualizarEstatisticas();}} catch(err){mostrarToast('Erro ao mudar status.','danger');}}); } else { $(sel).niceSelect('update');}});
+        } catch(e){ console.warn("NiceSelect status tabela falhou:", e); }
       }
-
-      const btnAnterior = document.querySelector('.pagination .page-item:first-child');
-      const btnProximo = document.querySelector('.pagination .page-item:last-child');
-      btnAnterior.classList.toggle('disabled', pagina === 1);
-      btnProximo.classList.toggle('disabled', pagina === totalPaginas);
+      paginationNumbersEl.innerHTML = '';
+      for (let i=1; i<=totalPaginas; i++) { const pI=document.createElement('li');pI.className=`page-item ${i===pagina?'active':''}`;pI.innerHTML=`<a class="page-link" href="#" onclick="irParaPagina(${i})">${i}</a>`; paginationNumbersEl.appendChild(pI);}
+      const btnAnt = document.querySelector('.pagination .page-item:first-child a');
+      const btnProx = document.querySelector('.pagination .page-item:last-child a');
+      if(btnAnt) btnAnt.parentElement.classList.toggle('disabled', pagina===1);
+      if(btnProx) btnProx.parentElement.classList.toggle('disabled', pagina===totalPaginas||totalPaginas===0);
     }
 
-    window.paginaAnterior = function() {
-      if (paginaAtual > 1) atualizarTabela(filtrosAtuais, paginaAtual - 1);
-    };
-
-    window.proximaPagina = function() {
-      const totalPaginas = Math.ceil(casos.filter(c => {
-        if (filtrosAtuais.data && c.data !== filtrosAtuais.data) return false;
-        if (filtrosAtuais.perito && c.perito !== filtrosAtuais.perito) return false;
-        if (filtrosAtuais.nomeCaso && !(c.nomeCaso || '').toLowerCase().includes(filtrosAtuais.nomeCaso.toLowerCase())) return false;
-        return true;
-      }).length / casosPorPagina);
-      if (paginaAtual < totalPaginas) atualizarTabela(filtrosAtuais, paginaAtual + 1);
-    };
-
-    window.irParaPagina = function(pagina) {
-      atualizarTabela(filtrosAtuais, pagina);
-    };
+    window.paginaAnterior=function(){if(paginaAtual>1)atualizarTabela(filtrosAtuais,paginaAtual-1);};
+    window.proximaPagina=function(){let cCF=0;if(casos&&casos.length>0){cCF=casos.filter(c=>{let pF=true;if(filtrosAtuais.dataInicio&&filtrosAtuais.dataFim){pF=pF&&(c.data&&c.data>=filtrosAtuais.dataInicio&&c.data<=filtrosAtuais.dataFim);}else if(filtrosAtuais.dataInicio){pF=pF&&(c.data&&c.data>=filtrosAtuais.dataInicio);}else if(filtrosAtuais.dataFim){pF=pF&&(c.data&&c.data<=filtrosAtuais.dataFim);}if(filtrosAtuais.perito)pF=pF&&(c.perito===filtrosAtuais.perito);if(filtrosAtuais.nomeCaso)pF=pF&&((c.nomeCaso||'').toLowerCase().includes(filtrosAtuais.nomeCaso.toLowerCase()));if(filtrosAtuais.tipoCrimeTabela)pF=pF&&(c.tipoCrime===filtrosAtuais.tipoCrimeTabela);return pF;}).length;}const tP=Math.ceil(cCF/casosPorPagina)||1;if(paginaAtual<tP)atualizarTabela(filtrosAtuais,paginaAtual+1);};
+    window.irParaPagina=function(p){atualizarTabela(filtrosAtuais,p);};
 
     window.aplicarFiltros = function() {
       filtrosAtuais = {
-        data: filtroData ? filtroData.value : '',
-        perito: filtroPerito ? filtroPerito.value : '',
-        nomeCaso: filtroNomeCaso ? filtroNomeCaso.value.trim() : ''
+        dataInicio: filtroDataInicioEl ? filtroDataInicioEl.value : '',
+        dataFim: filtroDataFimEl ? filtroDataFimEl.value : '',
+        perito: filtroPeritoEl ? filtroPeritoEl.value : '',
+        nomeCaso: filtroNomeCasoEl ? filtroNomeCasoEl.value.trim() : '',
+        tipoCrimeTabela: filtroTipoCrimeTabelaEl ? filtroTipoCrimeTabelaEl.value : '' // Novo filtro
       };
       paginaAtual = 1;
       atualizarTabela(filtrosAtuais, 1);
     };
 
     window.limparFiltros = function() {
-      if (filtroData) filtroData.value = '';
-      if (filtroPerito) filtroPerito.value = '';
-      if (filtroNomeCaso) filtroNomeCaso.value = '';
-      filtrosAtuais = {};
-      paginaAtual = 1;
-      atualizarTabela({}, 1);
+      if(filtroDataInicioEl) filtroDataInicioEl.value=''; if(filtroDataFimEl) filtroDataFimEl.value='';
+      if(filtroPeritoEl){filtroPeritoEl.value=''; try{$(filtroPeritoEl).niceSelect('update');}catch(e){}}
+      if(filtroNomeCasoEl) filtroNomeCasoEl.value='';
+      if(filtroTipoCrimeTabelaEl){filtroTipoCrimeTabelaEl.value=''; try{$(filtroTipoCrimeTabelaEl).niceSelect('update');}catch(e){}}
+      filtrosAtuais={}; paginaAtual=1; atualizarTabela({},1);
     };
+    
+    if (filtroPeritoEl) { try {$(filtroPeritoEl).niceSelect();} catch(e) {console.warn("NiceSelect para filtroPeritoEl falhou.")}}
+    if (filtroTipoCrimeTabelaEl) { try {$(filtroTipoCrimeTabelaEl).niceSelect();} catch(e) {console.warn("NiceSelect para filtroTipoCrimeTabelaEl falhou.")}}
 
-    window.excluirCaso = async function(casoId) {
-      if (confirm('Tem certeza que deseja excluir este caso?')) {
+
+    window.excluirCaso = async function(casoId) { /* Mesma função da resposta anterior */ 
+        if (confirm('Tem certeza que deseja excluir este caso e todas as suas evidências associadas? Esta ação é irreversível.')) {
+        if (!dbPromise) return;
         try {
           const db = await dbPromise;
+          if (db.objectStoreNames.contains('evidencias')) {
+            const txEvidencias = db.transaction('evidencias', 'readwrite');
+            const storeEvidencias = txEvidencias.objectStore('evidencias');
+            const idParaBuscaEvidencia = String(casoId); 
+            const indiceCasoId = storeEvidencias.index('casoId');
+            let cursor = await indiceCasoId.openCursor(IDBKeyRange.only(idParaBuscaEvidencia));
+            while(cursor) {
+                await storeEvidencias.delete(cursor.primaryKey);
+                if (cursor.value.photoId && db.objectStoreNames.contains('photos')) {
+                     const txPhotos = db.transaction('photos', 'readwrite');
+                     await txPhotos.objectStore('photos').delete(cursor.value.photoId);
+                     await txPhotos.done;
+                }
+                cursor = await cursor.continue();
+            }
+            await txEvidencias.done;
+          }
           await db.delete('laudos', casoId);
           casos = casos.filter(caso => caso.id !== casoId);
-          mostrarToast('Caso excluído com sucesso!', 'danger');
-          atualizarTabela();
-          atualizarEstatisticas();
-          if (laudosCarousel) atualizarCasos();
-          if (window.location.pathname.includes('Laudos.html')) {
-            setTimeout(() => window.location.href = 'index.html', 1000);
-          }
-        } catch (err) {
-          console.error('Erro ao excluir caso:', err);
-          mostrarToast('Erro ao excluir o caso.', 'danger');
-        }
+          mostrarToast('Caso e evidências excluídos!', 'success');
+          atualizarTabela(); atualizarEstatisticas();
+        } catch (err) { console.error('Erro ao excluir:', err); mostrarToast('Erro ao excluir o caso.', 'danger');}
       }
     };
 
     function atualizarEstatisticas() {
-      if (!totalLaudos || !laudosHoje || !peritoAtivo) return;
-
-      const hoje = new Date().toISOString().split('T')[0];
-      const casosHojeCount = casos.filter(c => c.data === hoje).length;
-      const peritosCount = {};
-      casos.forEach(c => {
-        if (c.perito) peritosCount[c.perito] = (peritosCount[c.perito] || 0) + 1;
-      });
-
-      totalLaudos.textContent = casos.length;
-      laudosHoje.textContent = casosHojeCount;
-      peritoAtivo.textContent = Object.keys(peritosCount).length
-        ? Object.keys(peritosCount).reduce((a, b) => peritosCount[a] > peritosCount[b] ? a : b)
-        : 'Nenhum';
-
-      if (peritoChart) {
-        try {
-          new Chart(peritoChart.getContext('2d'), {
-            type: 'bar',
-            data: {
-              labels: ['Nicolas Gomes', 'Manoel Gomes', 'João Pedro', 'Rafael Arcanjo', 'Maisa Letícia'],
-              datasets: [{
-                label: 'Casos por Perito',
-                data: [
-                  peritosCount['Nicolas Gomes'] || 0,
-                  peritosCount['Manoel Gomes'] || 0,
-                  peritosCount['João Pedro'] || 0,
-                  peritosCount['Rafael Arcanjo'] || 0,
-                  peritosCount['Maisa Letícia'] || 0
-                ],
-                backgroundColor: 'rgba(167, 202, 201, 0.5)',
-                borderColor: '#A7CAC9',
-                borderWidth: 1
-              }]
-            },
-            options: {
-              scales: { y: { beginAtZero: true } }
-            }
-          });
-        } catch (err) {
-          console.error('Erro ao renderizar gráfico:', err);
-        }
+      if (!totalLaudosEl || !laudosHojeEl || !peritoAtivoEl || !casos) return;
+      const hoje=new Date().toISOString().split('T')[0]; const casosHojeCount=casos.filter(c=>c.data===hoje).length;
+      const peritosCount={}; casos.forEach(c=>{if(c.perito)peritosCount[c.perito]=(peritosCount[c.perito]||0)+1;});
+      totalLaudosEl.textContent=casos.length; laudosHojeEl.textContent=casosHojeCount;
+      peritoAtivoEl.textContent=Object.keys(peritosCount).length?Object.keys(peritosCount).reduce((a,b)=>peritosCount[a]>peritosCount[b]?a:b):'Nenhum';
+      if (peritoChartCanvas && typeof Chart !=='undefined') {
+        const lblP=Object.keys(peritosCount).length>0?Object.keys(peritosCount):['N/A']; const dataP=Object.values(peritosCount).length>0?Object.values(peritosCount):[0];
+        if(window.myPeritoChart instanceof Chart)window.myPeritoChart.destroy();
+        window.myPeritoChart=new Chart(peritoChartCanvas.getContext('2d'),{type:'bar',data:{labels:lblP,datasets:[{label:'Casos por Perito',data:dataP,backgroundColor:'rgba(167,202,201,0.7)',borderColor:'#A7CAC9',borderWidth:1,barPercentage:0.6,categoryPercentage:0.8}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{stepSize:1,precision:0}}},plugins:{legend:{display:true,position:'top'},title:{display:true,text:'Casos por Perito'}}}});
       }
+      atualizarGraficoStatusPercentual(); atualizarGraficoTipoCrime();
+      atualizarGraficoEtniaVitima(); atualizarGraficoFaixaEtariaVitima();
+      atualizarGraficoEvolucaoCasos();
+      prepararDadosParaMapa(); // Chamada para preparar dados do mapa
     }
 
-    function atualizarCasos() {
-      if (!laudosCarousel) return;
-      $(laudosCarousel).owlCarousel('destroy');
-      laudosCarousel.innerHTML = '';
-      if (casos.length === 0) {
-        laudosCarousel.innerHTML = '<div class="item"><div class="box"><div class="detail-box"><p>Nenhum caso salvo</p></div></div></div>';
-      } else {
-        casos.forEach((caso, index) => {
-          const fotosCount = caso.fotos ? caso.fotos.length : 0;
-          const item = document.createElement('div');
-          item.className = 'item';
-          item.innerHTML = `
-            <div class="box">
-              <div class="img-box">
-                <img src="images/laudos.png" alt="Pasta" />
-              </div>
-              <div class="detail-box">
-                <h5>${caso.nomeCaso || `Caso ${index + 1}`}</h5>
-                <p>${fotosCount} foto(s)</p>
-                <div class="btn-box">
-                  <button class="btn btn-custom" onclick="window.location.href='Adicionar_casos.html?id=${caso.id}'">Editar</button>
-                </div>
-              </div>
-            </div>
-          `;
-          laudosCarousel.appendChild(item);
-        });
-      }
-      try {
-        $('.team_carousel').owlCarousel({
-          loop: true,
-          margin: 15,
-          dots: true,
-          autoplay: true,
-          navText: [
-            '<i class="fa fa-angle-left" aria-hidden="true"></i>',
-            '<i class="fa fa-angle-right" aria-hidden="true"></i>'
-          ],
-          autoplayHoverPause: true,
-          responsive: {
-            0: { items: 1, margin: 0 },
-            576: { items: 2 },
-            992: { items: 3 }
-          }
-        });
-      } catch (err) {
-        console.error('Erro ao inicializar OwlCarousel:', err);
-      }
+    function atualizarGraficoStatusPercentual() { /* Mesma da resposta anterior */
+        const canvas = document.getElementById('statusPercentChart');
+        if (!canvas || typeof Chart === 'undefined' || !casos ) { if(canvas && window.myStatusChart instanceof Chart) window.myStatusChart.destroy(); return; }
+        const counts = { 'Em andamento': 0, 'Finalizado': 0, 'Arquivado': 0 }; let total = 0;
+        casos.forEach(c => { const s=c.status&&counts.hasOwnProperty(c.status)?c.status:'Em andamento'; counts[s]++; total++; });
+        if(total === 0){ if(window.myStatusChart instanceof Chart) window.myStatusChart.destroy(); return; }
+        const labels = ['Em Andamento', 'Finalizado', 'Arquivado'];
+        const data = [counts['Em andamento'], counts['Finalizado'], counts['Arquivado']];
+        const bg = ['rgba(255,159,64,0.7)','rgba(75,192,192,0.7)','rgba(153,102,255,0.7)'];
+        if (window.myStatusChart instanceof Chart) window.myStatusChart.destroy();
+        window.myStatusChart = new Chart(canvas.getContext('2d'), { type: 'pie', data: { labels, datasets: [{ data, backgroundColor:bg, borderColor:bg.map(c=>c.replace('0.7','1')), borderWidth:1 }] }, options: { responsive:true, maintainAspectRatio:false, plugins: { legend:{position:'top'}, title:{display:true, text:'Status dos Casos'}, tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw} (${(c.raw/total*100).toFixed(1)}%)`}}}}});
     }
-  }
-
-  if (window.location.pathname.includes('Adicionar_casos.html')) {
-    const formLaudo = document.getElementById('formLaudo');
-    const fotoInput = document.getElementById('foto');
-    const fileNamesSpan = document.getElementById('file-names');
-    const clearPhotosBtn = document.getElementById('clearPhotos');
-
-    if (fotoInput && fileNamesSpan) {
-      fotoInput.addEventListener('change', function() {
-        const files = Array.from(this.files);
-        const validFormats = ['image/jpeg', 'image/png', 'image/gif'];
-        const validFiles = files.filter(file => validFormats.includes(file.type));
-        if (validFiles.length < files.length) {
-          mostrarToast('Apenas JPEG, PNG ou GIF são permitidos.', 'warning');
-        }
-        fileNamesSpan.textContent = validFiles.length > 0 ? validFiles.map(f => f.name).join(', ') : 'Nenhuma foto selecionada';
-      });
+    function atualizarGraficoTipoCrime() { /* Mesma da resposta anterior */
+        const canvas = document.getElementById('tipoCrimeChart');
+        if (!canvas || typeof Chart === 'undefined' || !casos) { if(canvas && window.myTipoCrimeChart instanceof Chart) window.myTipoCrimeChart.destroy(); return; }
+        const counts = {}; let total = 0;
+        casos.forEach(c => { if(c.tipoCrime){ const tipo = c.tipoCrime.trim() || "Não Especificado"; counts[tipo]=(counts[tipo]||0)+1; total++;}});
+        if(total === 0){ if(window.myTipoCrimeChart instanceof Chart) window.myTipoCrimeChart.destroy(); return; }
+        const labels = Object.keys(counts); const data = Object.values(counts);
+        const bg = labels.map(()=>`rgba(${Math.floor(Math.random()*200+55)},${Math.floor(Math.random()*200+55)},${Math.floor(Math.random()*200+55)},0.7)`);
+        if (window.myTipoCrimeChart instanceof Chart) window.myTipoCrimeChart.destroy();
+        window.myTipoCrimeChart = new Chart(canvas.getContext('2d'), { type: 'doughnut', data: { labels, datasets: [{ data, backgroundColor:bg, borderColor:bg.map(c=>c.replace('0.7','1')), borderWidth:1 }] }, options: { responsive:true, maintainAspectRatio:false, plugins: { legend:{position:'right'}, title:{display:true, text:'Casos por Tipo de Crime'}, tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw} (${(c.raw/total*100).toFixed(1)}%)`}}}}});
+    }
+    function atualizarGraficoEtniaVitima() { /* Mesma da resposta anterior */
+        const canvas = document.getElementById('etniaVitimaChart');
+        if (!canvas || typeof Chart === 'undefined' || !casos) { if(canvas && window.myEtniaChart instanceof Chart) window.myEtniaChart.destroy(); return; }
+        const counts = {}; let total = 0;
+        casos.forEach(c => { if(c.etniaVitima !== undefined && c.etniaVitima !== null){ const etnia = c.etniaVitima ? c.etniaVitima.trim() : "Não Informada"; counts[etnia]=(counts[etnia]||0)+1; total++;}});
+        if(total === 0){ if(window.myEtniaChart instanceof Chart) window.myEtniaChart.destroy(); return; }
+        const labels = Object.keys(counts); const data = Object.values(counts);
+        const bg = labels.map(()=>`rgba(${Math.floor(Math.random()*200+55)},${Math.floor(Math.random()*200+55)},${Math.floor(Math.random()*200+55)},0.7)`);
+        if (window.myEtniaChart instanceof Chart) window.myEtniaChart.destroy();
+        window.myEtniaChart = new Chart(canvas.getContext('2d'), { type: 'pie', data: { labels, datasets: [{ data, backgroundColor:bg, borderColor:bg.map(c=>c.replace('0.7','1')), borderWidth:1 }] }, options: { responsive:true, maintainAspectRatio:false, plugins: { legend:{position:'right'}, title:{display:true, text:'Casos por Etnia da Vítima'}, tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw} (${(c.raw/total*100).toFixed(1)}%)`}}}}});
+    }
+    function atualizarGraficoFaixaEtariaVitima() { /* Mesma da resposta anterior */
+        const canvas = document.getElementById('faixaEtariaVitimaChart');
+        if (!canvas || typeof Chart === 'undefined' || !casos) { if(canvas && window.myFaixaEtariaChart instanceof Chart) window.myFaixaEtariaChart.destroy(); return; }
+        const faixas = {'0-17':0,'18-29':0,'30-45':0,'46-59':0,'60+':0,'Não Informada':0}; let total = 0;
+        casos.forEach(c => { if(c.idadeVitima !== undefined){ const idade = c.idadeVitima;
+            if(idade === null || idade === '') faixas['Não Informada']++;
+            else if(idade>=0 && idade<=17) faixas['0-17']++; else if(idade>=18 && idade<=29) faixas['18-29']++;
+            else if(idade>=30 && idade<=45) faixas['30-45']++; else if(idade>=46 && idade<=59) faixas['46-59']++;
+            else if(idade>=60) faixas['60+']++; else faixas['Não Informada']++; total++;}});
+        if(total === 0){ if(window.myFaixaEtariaChart instanceof Chart) window.myFaixaEtariaChart.destroy(); return; }
+        const labels = Object.keys(faixas); const data = Object.values(faixas);
+        const bg = ['rgba(255,99,132,0.7)','rgba(54,162,235,0.7)','rgba(255,206,86,0.7)','rgba(75,192,192,0.7)','rgba(153,102,255,0.7)','rgba(201,203,207,0.7)'];
+        if(window.myFaixaEtariaChart instanceof Chart) window.myFaixaEtariaChart.destroy();
+        window.myFaixaEtariaChart = new Chart(canvas.getContext('2d'), {type:'bar', data:{labels, datasets:[{label:'Nº de Casos',data,backgroundColor:bg,borderColor:bg.map(c=>c.replace('0.7','1')),borderWidth:1}]}, options:{responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{legend:{display:false},title:{display:true, text:'Casos por Faixa Etária da Vítima'}}, scales:{x:{beginAtZero:true, ticks:{stepSize:1, precision:0}}}}});
     }
 
-    if (clearPhotosBtn) {
-      clearPhotosBtn.addEventListener('click', () => {
-        if (fotoInput) fotoInput.value = '';
-        if (fileNamesSpan) fileNamesSpan.textContent = 'Nenhuma foto selecionada';
-      });
-    }
-
-    async function validarNomeCaso(nomeCaso, casoId = null) {
-      if (!nomeCaso || nomeCaso.trim() === '') return 'O Nome do Caso é obrigatório.';
-      const regex = /^[a-zA-Z0-9\s-]{3,}$/;
-      if (!regex.test(nomeCaso)) return 'O Nome do Caso deve ter pelo menos 3 caracteres e conter apenas letras, números, espaços ou hífens.';
-      try {
-        const db = await dbPromise;
-        const allCasos = await db.getAll('laudos');
-        const exists = allCasos.some(c => c.nomeCaso.toLowerCase() === nomeCaso.toLowerCase() && c.id !== casoId);
-        if (exists) return 'O Nome do Caso já existe.';
-        return null;
-      } catch (err) {
-        console.error('Erro ao validar nome do caso:', err);
-        return 'Erro ao validar o nome do caso.';
-      }
-    }
-
-    function limparFormulario() {
-      if (formLaudo) {
-        formLaudo.reset();
-        const nomeCasoInput = document.getElementById('nomeCaso');
-        nomeCasoInput.classList.remove('is-invalid');
-        const errorDiv = nomeCasoInput.parentNode.querySelector('.invalid-feedback');
-        if (errorDiv) errorDiv.textContent = '';
-        if (fileNamesSpan) fileNamesSpan.textContent = 'Nenhuma foto selecionada';
-        if (fotoInput) fotoInput.value = '';
-        try {
-          $('#peritoNome').niceSelect('update');
-          $('#statusCaso').niceSelect('update');
-        } catch (err) {
-          console.error('Erro ao atualizar niceSelect:', err);
-        }
-      }
-    }
-
-    window.irParaEvidencias = function() {
-      const nomeCaso = $('#nomeCaso').val();
-      if (!nomeCaso) {
-        mostrarToast('Preencha o Nome do Caso antes de adicionar evidências.', 'warning');
+    function atualizarGraficoEvolucaoCasos() {
+      const canvas = document.getElementById('evolucaoCasosChart');
+      if (!canvas || !periodoEvolucaoSelect || typeof Chart === 'undefined' || !casos ) {
+        if(canvas && window.myEvolucaoChart instanceof Chart) window.myEvolucaoChart.destroy();
         return;
       }
-      window.location.href = `Adicionar_evidencias.html?casoId=${encodeURIComponent(nomeCaso)}`;
-    };
+      const periodo = periodoEvolucaoSelect.value;
+      const dataInicioFiltro = dataInicioEvolucaoEl ? dataInicioEvolucaoEl.value : null;
+      const dataFimFiltro = dataFimEvolucaoEl ? dataFimEvolucaoEl.value : null;
+      let casosParaGrafico = [...casos];
 
-    function carregarEvidenciasCaso() {
-      const nomeCaso = $('#nomeCaso').val();
-      const evidencias = JSON.parse(localStorage.getItem('evidencias') || '[]');
-      const tableBody = $('#evidenciasTableBody');
-      if (tableBody) {
-        tableBody.empty();
-        const evidenciasFiltradas = evidencias.filter(e => e.casoId === nomeCaso);
-        evidenciasFiltradas.forEach((evidencia, index) => {
-          const row = `
-            <tr>
-              <td>${evidencia.tituloEvidencia}</td>
-              <td>${evidencia.descricaoEvidencia}</td>
-              <td>
-                <button class="btn btn-sm btn-primary me-1" onclick="visualizarEvidencia(${index}, '${nomeCaso}')">
-                  <i class="bi bi-eye"></i> Visualizar
-                </button>
-                <button class="btn btn-sm btn-warning" onclick="editarEvidencia(${index}, '${nomeCaso}')">
-                  <i class="bi bi-pencil"></i> Editar
-                </button>
-              </td>
-            </tr>
-          `;
-          tableBody.append(row);
+      if (dataInicioFiltro && dataFimFiltro) {
+        casosParaGrafico = casosParaGrafico.filter(c => c.data && c.data >= dataInicioFiltro && c.data <= dataFimFiltro);
+      } else if (dataInicioFiltro) {
+        casosParaGrafico = casosParaGrafico.filter(c => c.data && c.data >= dataInicioFiltro);
+      } else if (dataFimFiltro) {
+        casosParaGrafico = casosParaGrafico.filter(c => c.data && c.data <= dataFimFiltro);
+      }
+      
+      const counts = {}; let total = 0;
+      casosParaGrafico.forEach(c => { if(c.data){ const dt=new Date(c.data+"T00:00:00"); if(isNaN(dt.getTime())) return;
+        let chave = periodo==='mensal' ? `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}` : dt.getFullYear().toString();
+        counts[chave]=(counts[chave]||0)+1; total++;}});
+      
+      if(total === 0){ 
+        if(window.myEvolucaoChart instanceof Chart) window.myEvolucaoChart.destroy();
+        // Opcional: Mostrar mensagem de "sem dados" no canvas
+        // const ctx = canvas.getContext('2d');
+        // ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // ctx.textAlign = 'center';
+        // ctx.fillText("Nenhum dado para o período selecionado.", canvas.width / 2, canvas.height / 2);
+        return; 
+      }
+      const labels = Object.keys(counts).sort(); const data = labels.map(l=>counts[l]);
+      if(window.myEvolucaoChart instanceof Chart) window.myEvolucaoChart.destroy();
+      window.myEvolucaoChart = new Chart(canvas.getContext('2d'), {type:'line', data:{labels, datasets:[{label:'Nº de Casos',data,borderColor:'#A7CAC9',backgroundColor:'rgba(167,202,201,0.3)',fill:true,tension:0.1}]}, options:{responsive:true, maintainAspectRatio:false, scales:{y:{beginAtZero:true,ticks:{stepSize:1,precision:0}},x:{title:{display:true,text:periodo==='mensal'?'Mês/Ano':'Ano'}}},plugins:{legend:{display:true,position:'top'},title:{display:true,text:`Evolução de Casos (${periodo==='mensal'?'Mensal':'Anual'})`}}}});
+    }
+    
+    if (filtrarGraficoEvolucaoBtn) { // Botão para confirmar filtro do gráfico de evolução
+        filtrarGraficoEvolucaoBtn.addEventListener('click', atualizarGraficoEvolucaoCasos);
+    }
+     // O seletor de período também atualiza o gráfico
+    if (periodoEvolucaoSelect) {
+        periodoEvolucaoSelect.addEventListener('change', atualizarGraficoEvolucaoCasos);
+    }
+
+    if (limparFiltroEvolucaoBtn) {
+        limparFiltroEvolucaoBtn.addEventListener('click', () => {
+            if(dataInicioEvolucaoEl) dataInicioEvolucaoEl.value = '';
+            if(dataFimEvolucaoEl) dataFimEvolucaoEl.value = '';
+            // Não resetamos o período (mensal/anual) ao limpar as datas,
+            // mas o gráfico será atualizado sem filtro de data.
+            atualizarGraficoEvolucaoCasos();
         });
-      }
     }
+    try { if(periodoEvolucaoSelect) $(periodoEvolucaoSelect).niceSelect(); } 
+    catch(e) {console.warn("NiceSelect para periodoEvolucao falhou.")}
 
-    window.visualizarEvidencia = function(index, casoId) {
-      const evidencias = JSON.parse(localStorage.getItem('evidencias') || '[]');
-      const evidenciasFiltradas = evidencias.filter(e => e.casoId === casoId);
-      const evidencia = evidenciasFiltradas[index];
 
-      $('#evidenciaNome').text(evidencia.tituloEvidencia);
-      $('#evidenciaTipo').text(evidencia.descricaoEvidencia);
-      $('#evidenciaData').text(evidencia.dataEvidencia || 'N/A');
-      $('#evidenciaArquivo').text(evidencia.fotoEvidencia || 'Nenhum arquivo');
-      $('#evidenciaObservacoes').text(evidencia.observacoes || 'Sem observações');
-
-      try {
-        const modal = new bootstrap.Modal(document.getElementById('visualizarEvidenciaModal'));
-        modal.show();
-      } catch (err) {
-        console.error('Erro ao abrir modal de visualização:', err);
-      }
-    };
-
-    window.editarEvidencia = function(index, casoId) {
-      const evidencias = JSON.parse(localStorage.getItem('evidencias') || '[]');
-      const evidenciasFiltradas = evidencias.filter(e => e.casoId === casoId);
-      const globalIndex = evidencias.indexOf(evidenciasFiltradas[index]);
-      window.location.href = `Adicionar_evidencias.html?casoId=${encodeURIComponent(casoId)}&editIndex=${globalIndex}`;
-    };
-
-    if (formLaudo) {
-      const nomeCasoInput = document.getElementById('nomeCaso');
-      const errorDiv = document.createElement('div');
-      errorDiv.className = 'invalid-feedback';
-      nomeCasoInput.parentNode.appendChild(errorDiv);
-
-      formLaudo.addEventListener('submit', async e => {
-        e.preventDefault();
-        if (!formLaudo.checkValidity()) {
-          e.stopPropagation();
-          formLaudo.classList.add('was-validated');
-          return;
+    // --- LÓGICA PARA O MAPA (PLACEHOLDER E PREPARAÇÃO DE DADOS) ---
+    function prepararDadosParaMapa() {
+        if (!casos || casos.length === 0) {
+            console.log("Sem dados de casos para o mapa.");
+            return [];
         }
 
-        const nomeCaso = nomeCasoInput.value.trim();
-        const casoId = new URLSearchParams(window.location.search).get('id') || Date.now().toString();
-
-        const error = await validarNomeCaso(nomeCaso, casoId);
-        if (error) {
-          nomeCasoInput.classList.add('is-invalid');
-          errorDiv.textContent = error;
-          return;
-        }
-
-        nomeCasoInput.classList.remove('is-invalid');
-        errorDiv.textContent = '';
-
-        const fotos = [];
-        if (fotoInput && fotoInput.files.length > 0) {
-          const validFormats = ['image/jpeg', 'image/png', 'image/gif'];
-          const files = Array.from(fotoInput.files).filter(file => validFormats.includes(file.type));
-          try {
-            for (const file of files) {
-              if (file.size > 2 * 1024 * 1024) {
-                mostrarToast(`A foto ${file.name} excede o limite de 2MB.`, 'warning');
-                continue;
-              }
-              const dataUrl = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = () => reject(new Error(`Erro ao ler ${file.name}`));
-                reader.readAsDataURL(file);
-              });
-              fotos.push(dataUrl);
-            }
-          } catch (err) {
-            console.error('Erro ao processar fotos:', err);
-            mostrarToast('Erro ao processar fotos.', 'danger');
-            return;
-          }
-        }
-
-        const caso = {
-          id: casoId,
-          nomeCaso,
-          data: $('#dataPericia').val(),
-          perito: $('#peritoNome').val(),
-          descricao: $('#exameDescricao').val(),
-          diagnostico: '',
-          observacoes: $('#observacoes').val(),
-          status: $('#statusCaso').val(),
-          fotos
-        };
-
-        const casoLocal = {
-          nomeCaso,
-          peritoNome: caso.perito,
-          statusCaso: caso.status,
-          dataPericia: caso.data,
-          exameDescricao: caso.descricao,
-          observacoes: caso.observacoes
-        };
-        const casosLocal = JSON.parse(localStorage.getItem('casos') || '[]');
-        const existingIndex = casosLocal.findIndex(c => c.nomeCaso === caso.nomeCaso);
-        if (existingIndex >= 0) {
-          casosLocal[existingIndex] = casoLocal;
-        } else {
-          casosLocal.push(casoLocal);
-        }
-        localStorage.setItem('casos', JSON.stringify(casosLocal));
-
-        try {
-          const db = await dbPromise;
-          const tx = db.transaction('laudos', 'readwrite');
-          await tx.store.put(caso);
-          await tx.done;
-          mostrarToast('Caso salvo com sucesso!', 'success');
-          limparFormulario();
-          window.location.href = 'index.html';
-        } catch (err) {
-          console.error('Erro ao salvar caso:', err);
-          mostrarToast('Erro ao salvar o caso.', 'danger');
-        }
-      });
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const casoId = urlParams.get('id');
-      if (casoId) {
-        (async () => {
-          try {
-            const db = await dbPromise;
-            const caso = await db.get('laudos', casoId);
-            if (caso) {
-              $('#nomeCaso').val(caso.nomeCaso || '');
-              $('#dataPericia').val(caso.data || '');
-              $('#peritoNome').val(caso.perito || '');
-              $('#exameDescricao').val(caso.descricao || '');
-              $('#observacoes').val(caso.observacoes || '');
-              $('#statusCaso').val(caso.status || 'Em andamento');
-              if (caso.fotos && caso.fotos.length > 0) {
-                fileNamesSpan.textContent = `${caso.fotos.length} foto(s) carregada(s)`;
-              }
-              try {
-                $('#peritoNome').niceSelect('update');
-                $('#statusCaso').niceSelect('update');
-              } catch (err) {
-                console.error('Erro ao atualizar niceSelect:', err);
-              }
-            }
-          } catch (err) {
-            console.error('Erro ao carregar caso para edição:', err);
-            mostrarToast('Erro ao carregar o caso.', 'danger');
-          }
-        })();
-      }
-
-      const casoIdParam = urlParams.get('casoId');
-      if (casoIdParam) {
-        $('#nomeCaso').val(decodeURIComponent(casoIdParam));
-        $('#casoId').val(decodeURIComponent(casoIdParam));
-      }
-      carregarEvidenciasCaso();
-      $('#nomeCaso').on('change', carregarEvidenciasCaso);
-    }
-  }
-
-  if (window.location.pathname.includes('Adicionar_evidencias.html')) {
-    // Captura o casoId da URL e preenche o campo hidden
-    const urlParams = new URLSearchParams(window.location.search);
-    const casoId = urlParams.get('casoId');
-    if (casoId) {
-      $('#casoId').val(decodeURIComponent(casoId));
+        const dadosMapa = casos.filter(caso => caso.latitude && caso.longitude)
+            .map(caso => ({
+                lat: parseFloat(caso.latitude),
+                lng: parseFloat(caso.longitude),
+                nomeCaso: caso.nomeCaso || 'Caso Sem Nome',
+                tipoCrime: caso.tipoCrime || 'Não Especificado',
+                data: caso.data || 'Sem data'
+            }));
+        
+        console.log("Dados preparados para o mapa:", dadosMapa);
+        // Aqui você chamaria a função da sua biblioteca de mapa para adicionar os marcadores.
+        // Exemplo conceitual com Leaflet:
+        // inicializarMapaComDados(dadosMapa); 
+        return dadosMapa;
     }
 
-    function carregarEvidenciasTabela() {
-      const casoId = urlParams.get('casoId');
-      const evidencias = JSON.parse(localStorage.getItem('evidencias') || '[]');
-      const tableBody = $('#evidenciasTable');
-      if (tableBody) {
-        tableBody.empty();
-        const evidenciasFiltradas = evidencias.filter(e => e.casoId === casoId);
-        evidenciasFiltradas.forEach((evidencia, index) => {
-          const row = `
-            <tr>
-              <td>${evidencia.tituloEvidencia}</td>
-              <td>${evidencia.descricaoEvidencia}</td>
-              <td>${evidencia.fotoEvidencia || 'Nenhuma foto'}</td>
-              <td>
-                <button class="btn btn-sm btn-primary me-1" onclick="visualizarEvidencia(${index}, '${casoId}')">
-                  <i class="bi bi-eye"></i> Visualizar
-                </button>
-                <button class="btn btn-sm btn-warning" onclick="editarEvidencia(${index}, '${casoId}')">
-                  <i class="bi bi-pencil"></i> Editar
-                </button>
-              </td>
-            </tr>
-          `;
-          tableBody.append(row);
-        });
-      }
-    }
+    // Função placeholder para inicialização do mapa real (ex: com Leaflet)
+    // window.inicializarMapaComDados = function(dados) {
+    //     const mapContainer = document.getElementById('mapContainer');
+    //     if (!mapContainer || typeof L === 'undefined') { // L é o objeto global do Leaflet
+    //         mapContainer.innerHTML = 'Para exibir o mapa, a biblioteca Leaflet.js precisa ser carregada e configurada.';
+    //         console.warn("Leaflet não carregado ou mapContainer não encontrado.");
+    //         return;
+    //     }
+    //     mapContainer.innerHTML = ''; // Limpa o placeholder
+        
+    //     // Exemplo de inicialização do Leaflet (necessita do CSS e JS do Leaflet no HTML)
+    //     // const map = L.map('mapContainer').setView([-8.05, -34.9], 10); // Recife como centro
+    //     // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    //     //     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    //     // }).addTo(map);
 
-    function limparFormularioEvidencia() {
-      const formEvidencia = $('#formEvidencia');
-      if (formEvidencia.length) {
-        formEvidencia[0].reset();
-        $('#file-name-evidencia').text('Nenhuma foto selecionada');
-        $('#editIndex').val('');
-        $('#cancelEditEvidencia').hide();
-        formEvidencia.removeClass('was-validated');
-      }
-    }
+    //     // dados.forEach(ponto => {
+    //     //     if (!isNaN(ponto.lat) && !isNaN(ponto.lng)) {
+    //     //         L.marker([ponto.lat, ponto.lng])
+    //     //             .addTo(map)
+    //     //             .bindPopup(`<b>${ponto.nomeCaso}</b><br>Tipo: ${ponto.tipoCrime}<br>Data: ${ponto.data}`);
+    //     //     }
+    //     // });
+    // }
 
-    window.cancelarEdicao = function() {
-      const casoId = urlParams.get('casoId');
-      limparFormularioEvidencia();
-      window.location.href = `Adicionar_casos.html?casoId=${encodeURIComponent(casoId)}`;
-    };
+  } // Fim do if (window.location.pathname.includes('index.html'))
 
-    function verificarModoEdicao() {
-      const editIndex = urlParams.get('editIndex');
-      const casoId = urlParams.get('casoId');
-      if (casoId) $('#casoId').val(casoId);
-      if (editIndex !== null) {
-        const evidencias = JSON.parse(localStorage.getItem('evidencias') || '[]');
-        const evidencia = evidencias[parseInt(editIndex)];
-        if (evidencia && evidencia.casoId === casoId) {
-          $('#tituloEvidencia').val(evidencia.tituloEvidencia);
-          $('#descricaoEvidencia').val(evidencia.descricaoEvidencia);
-          $('#file-name-evidencia').text(evidencia.fotoEvidencia || 'Nenhuma foto selecionada');
-          $('#editIndex').val(editIndex);
-          $('#casoId').val(casoId);
-          $('#cancelEditEvidencia').show();
-        }
-      }
-    }
-
-    $('#fotoEvidencia').on('change', function() {
-      const fileName = this.files[0]?.name || 'Nenhuma foto selecionada';
-      $('#file-name-evidencia').text(fileName);
-    });
-
-    $('#clearPhotoEvidencia').on('click', function() {
-      $('#fotoEvidencia').val('');
-      $('#file-name-evidencia').text('Nenhuma foto selecionada');
-    });
-
-    $('#formEvidencia').on('submit', function(e) {
-      e.preventDefault();
-      const form = this;
-      if (!form.checkValidity()) {
-        e.stopPropagation();
-        $(form).addClass('was-validated');
-        return;
-      }
-
-      const casoId = $('#casoId').val();
-      if (!casoId) {
-        mostrarToast('Nenhum caso selecionado.', 'danger');
-        return;
-      }
-
-      const evidencia = {
-        casoId,
-        tituloEvidencia: $('#tituloEvidencia').val(),
-        descricaoEvidencia: $('#descricaoEvidencia').val(),
-        fotoEvidencia: $('#fotoEvidencia').val() ? $('#file-name-evidencia').text() : '',
-        dataEvidencia: new Date().toISOString().split('T')[0]
-      };
-
-      const evidencias = JSON.parse(localStorage.getItem('evidencias') || '[]');
-      const editIndex = $('#editIndex').val();
-      if (editIndex !== '') {
-        evidencias[parseInt(editIndex)] = evidencia;
-      } else {
-        evidencias.push(evidencia);
-      }
-
-      localStorage.setItem('evidencias', JSON.stringify(evidencias));
-      limparFormularioEvidencia();
-      carregarEvidenciasTabela();
-  
-    });
-
-    carregarEvidenciasTabela();
-    verificarModoEdicao();
-  }
-
-  if (window.location.pathname.includes('Gerenciar_usuarios.html')) {
+  // Lógica para Gerenciar_usuarios.html
+  if (window.location.pathname.includes('Gerenciar_usuarios.html')) { /* Mesma da resposta anterior */ 
     function loadUsers() {
       let users = [];
-      try {
-        users = JSON.parse(localStorage.getItem('users') || '[]');
-        if (!Array.isArray(users)) {
-          console.warn('Dados de usuários corrompidos. Inicializando como array vazio.');
-          users = [];
-          localStorage.setItem('users', JSON.stringify(users));
-        }
-      } catch (err) {
-        console.error('Erro ao carregar usuários:', err);
-        mostrarToast('Erro ao carregar usuários.', 'danger');
-      }
-
+      try { users = JSON.parse(localStorage.getItem('users') || '[]'); if (!Array.isArray(users)) { users = []; localStorage.setItem('users', JSON.stringify(users));}}
+      catch (err) { mostrarToast('Erro ao carregar usuários.', 'danger'); }
       const tableBody = $('#userTableBody');
       if (tableBody) {
         tableBody.empty();
         users.forEach((user, index) => {
           tableBody.append(`
             <tr>
-              <td>${user.nome}</td>
-              <td>${user.email}</td>
-              <td>${user.tipo}</td>
+              <td>${user.nome || 'N/A'}</td> <td>${user.email || 'N/A'}</td> <td>${user.tipo || 'N/A'}</td>
               <td>
-                <button class="btn btn-black edit-user" data-index="${index}">Editar</button>
-                <button class="btn btn-danger delete-user" data-index="${index}">Excluir</button>
+                <button class="btn btn-dark btn-sm edit-user" data-index="${index}"><i class="bi bi-pencil-fill"></i> Editar</button>
+                <button class="btn btn-danger btn-sm delete-user" data-index="${index}"><i class="bi bi-trash-fill"></i> Excluir</button>
               </td>
-            </tr>
-          `);
+            </tr>`);
         });
       }
     }
-
     loadUsers();
-
     $('#userForm').on('submit', function(event) {
       event.preventDefault();
       const userIndex = $('#userIndex').val();
-      const user = {
-        nome: $('#nome').val(),
-        email: $('#email').val(),
-        senha: $('#senha').val(),
-        tipo: $('#tipo').val()
-      };
+      const user = { nome: $('#nome').val(), email: $('#email').val(), senha: $('#senha').val(), tipo: $('#tipo').val()};
+      if (!user.nome || !user.email || !user.senha || !user.tipo) { mostrarToast('Todos os campos são obrigatórios!', 'warning'); return; }
       let users = [];
-      try {
-        users = JSON.parse(localStorage.getItem('users') || '[]');
-        if (!Array.isArray(users)) users = [];
-      } catch (err) {
-        console.error('Erro ao parsear usuários:', err);
-        users = [];
-      }
-
-      if (userIndex === '') {
-        users.push(user);
-      } else {
-        users[userIndex] = user;
-        $('#userIndex').val('');
-        $('#cancelEdit').hide();
-      }
-
+      try { users = JSON.parse(localStorage.getItem('users') || '[]'); if (!Array.isArray(users)) users = [];} 
+      catch (err) { users = []; }
+      if (userIndex === '') users.push(user);
+      else { users[userIndex] = user; $('#userIndex').val(''); $('#cancelEdit').hide(); }
       localStorage.setItem('users', JSON.stringify(users));
-      loadUsers();
-      $('#userForm')[0].reset();
-      mostrarToast('Usuário salvo com sucesso!', 'success');
+      loadUsers(); $('#userForm')[0].reset(); try{$('#tipo').niceSelect('update');}catch(e){}
+      mostrarToast('Usuário salvo!', 'success');
     });
-
     $(document).on('click', '.edit-user', function() {
-      const index = $(this).data('index');
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      const user = users[index];
-
-      $('#nome').val(user.nome);
-      $('#email').val(user.email);
-      $('#senha').val(user.senha);
-      $('#tipo').val(user.tipo);
-      $('#userIndex').val(index);
-      $('#cancelEdit').show();
+      const index = $(this).data('index'); const users = JSON.parse(localStorage.getItem('users')||'[]'); const user = users[index];
+      $('#nome').val(user.nome); $('#email').val(user.email); $('#senha').val(user.senha); $('#tipo').val(user.tipo);
+      try{$('#tipo').niceSelect('update');}catch(e){}
+      $('#userIndex').val(index); $('#cancelEdit').show();
     });
-
     $('#cancelEdit').on('click', function() {
-      $('#userForm')[0].reset();
-      $('#userIndex').val('');
-      $(this).hide();
+      $('#userForm')[0].reset(); $('#userIndex').val(''); $(this).hide(); try{$('#tipo').niceSelect('update');}catch(e){}
     });
-
     $(document).on('click', '.delete-user', function() {
-      const index = $(this).data('index');
-      let users = JSON.parse(localStorage.getItem('users') || '[]');
-      users.splice(index, 1);
-      localStorage.setItem('users', JSON.stringify(users));
-      loadUsers();
-      mostrarToast('Usuário excluído com sucesso!', 'danger');
+      if (!confirm("Tem certeza?")) return;
+      const index = $(this).data('index'); let users = JSON.parse(localStorage.getItem('users')||'[]');
+      users.splice(index,1); localStorage.setItem('users',JSON.stringify(users)); loadUsers();
+      mostrarToast('Usuário excluído!', 'danger');
     });
+    try { $('#tipo').niceSelect(); } catch(e) { console.warn("NiceSelect para tipo de usuário falhou.");}
   }
 });
 
-// Inicializar IndexedDB
-let dbPromise = null;
-const paginasQueUsamIndexedDB = [
-  'index.html',
-  'Adicionar_casos.html',
-  'Laudos.html',
-  'Adicionar_evidencias.html',
-  'Visualizar_evidencia.html'
-];
-if (paginasQueUsamIndexedDB.some(pagina => window.location.pathname.includes(pagina))) {
-  try {
-    dbPromise = idb.openDB('forescanDB', 1, {
-      upgrade(db) {
-        // Criar objectStore para laudos
-        if (!db.objectStoreNames.contains('laudos')) {
-          db.createObjectStore('laudos', { keyPath: 'id' });
+// Forçar inicialização do mapa em qualquer página com o elemento 'locationPickerMap'
+document.addEventListener('DOMContentLoaded', () => {
+  const mapElement = document.getElementById('locationPickerMap');
+  if (mapElement && typeof L !== 'undefined') {
+    const map = L.map('locationPickerMap').setView([-8.05428, -34.8813], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+    let marker;
+    map.on('click', function(e) {
+      const { lat, lng } = e.latlng;
+      if (marker) {
+        marker.setLatLng([lat, lng]);
+      } else {
+        marker = L.marker([lat, lng]).addTo(map);
+      }
+      const latInput = document.getElementById('latitude');
+      const lngInput = document.getElementById('longitude');
+      if (latInput) latInput.value = lat.toFixed(6);
+      if (lngInput) lngInput.value = lng.toFixed(6);
+    });
+    const latInput = document.getElementById('latitude') ? document.getElementById('latitude').value : '';
+    const lngInput = document.getElementById('longitude') ? document.getElementById('longitude').value : '';
+    if (latInput && lngInput) {
+      const lat = parseFloat(latInput);
+      const lng = parseFloat(lngInput);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        marker = L.marker([lat, lng]).addTo(map);
+        map.setView([lat, lng], 13);
+      }
+    }
+  }
+});
+// Forçar inicialização de qualquer mapa encontrado
+document.addEventListener('DOMContentLoaded', () => {
+  // Função para inicializar um mapa em um container
+  function inicializarMapa(containerId, latInputId, lngInputId) {
+    const mapElement = document.getElementById(containerId);
+    if (mapElement && typeof L !== 'undefined') {
+      const map = L.map(containerId).setView([-8.05428, -34.8813], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      let marker;
+      map.on('click', function(e) {
+        const { lat, lng } = e.latlng;
+        if (marker) {
+          marker.setLatLng([lat, lng]);
+        } else {
+          marker = L.marker([lat, lng]).addTo(map);
         }
-        // Criar objectStore para evidencias
-        if (!db.objectStoreNames.contains('evidencias')) {
-          const store = db.createObjectStore('evidencias', { keyPath: 'id', autoIncrement: true });
-          store.createIndex('casoId', 'casoId', { unique: false });
+        if (latInputId) document.getElementById(latInputId).value = lat.toFixed(6);
+        if (lngInputId) document.getElementById(lngInputId).value = lng.toFixed(6);
+      });
+
+      // Se já existirem valores nos inputs, coloca o marcador
+      if (latInputId && lngInputId) {
+        const latInput = document.getElementById(latInputId).value;
+        const lngInput = document.getElementById(lngInputId).value;
+        if (latInput && lngInput) {
+          const lat = parseFloat(latInput);
+          const lng = parseFloat(lngInput);
+          if (!isNaN(lat) && !isNaN(lng)) {
+            marker = L.marker([lat, lng]).addTo(map);
+            map.setView([lat, lng], 13);
+          }
         }
       }
-    });
-    console.log('IndexedDB inicializado com sucesso.');
-  } catch (err) {
-    console.error('Erro ao inicializar IndexedDB:', err);
-    mostrarToast('Erro ao inicializar o banco de dados.', 'danger');
+    }
   }
+
+  // Inicializa para "Adicionar_casos.html"
+  inicializarMapa('locationPickerMap', 'latitude', 'longitude');
+
+  // Inicializa para "index.html"
+  inicializarMapa('mapContainer', null, null);
+});
+function prepararDadosParaMapa() {
+    if (!casos || casos.length === 0) {
+        console.log("Sem dados de casos para o mapa.");
+        return [];
+    }
+
+    const dadosMapa = casos.filter(caso => caso.latitude && caso.longitude)
+        .map(caso => ({
+            lat: parseFloat(caso.latitude),
+            lng: parseFloat(caso.longitude),
+            nomeCaso: caso.nomeCaso || 'Caso Sem Nome',
+            tipoCrime: caso.tipoCrime || 'Não Especificado',
+            data: caso.data || 'Sem data'
+        }));
+
+    console.log("Dados preparados para o mapa:", dadosMapa);
+
+    // Chamada da função para renderizar no mapa
+    inicializarMapaComDados(dadosMapa);
+    return dadosMapa;
 }
+
+window.inicializarMapaComDados = function(dados) {
+    const mapContainer = document.getElementById('mapContainer');
+    if (!mapContainer || typeof L === 'undefined') {
+        mapContainer.innerHTML = 'Erro ao carregar o mapa. Verifique se o Leaflet está corretamente importado.';
+        console.warn("Leaflet não carregado ou #mapContainer não encontrado.");
+        return;
+    }
+
+    // Limpa o conteúdo anterior (caso o mapa já tenha sido inicializado antes)
+    mapContainer.innerHTML = '';
+
+    // Define altura fixa se não estiver definida via CSS
+    mapContainer.style.height = "400px";
+
+    // Inicializa o mapa
+    const map = L.map('mapContainer').setView([-8.05, -34.9], 11); // Recife
+
+    // Adiciona camadas de mapa (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Adiciona marcadores
+    dados.forEach(ponto => {
+        if (!isNaN(ponto.lat) && !isNaN(ponto.lng)) {
+            L.marker([ponto.lat, ponto.lng])
+                .addTo(map)
+                .bindPopup(`<strong>${ponto.nomeCaso}</strong><br>Crime: ${ponto.tipoCrime}<br>Data: ${ponto.data}`);
+        }
+    });
+};
