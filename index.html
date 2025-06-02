@@ -38,6 +38,21 @@
       height: 400px;
       width: 100%;
     }
+    .action-btn {
+      width: 38px;
+      height: 31px;
+      padding: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .filtros-graficos {
+      background-color: #f8f9fa;
+      border-radius: 0.25rem;
+      padding: 0.75rem;
+      margin-top: 1rem;
+      border: 1px solid #dee2e6;
+    }
   </style>
 </head>
 <body>
@@ -99,6 +114,51 @@
               </div>
             </div>
             
+            <!-- Filtros de data para todos os gráficos -->
+            <div id="filtrosGraficos" class="filtros-graficos">
+              <div class="row gx-2 gy-2 align-items-end">
+                <div class="col-sm-auto flex-grow-1">
+                  <label for="dataInicioGrafico" class="form-label form-label-sm mb-0">De:</label>
+                  <input type="date" class="form-control form-control-sm" id="dataInicioGrafico">
+                </div>
+                <div class="col-sm-auto flex-grow-1">
+                  <label for="dataFimGrafico" class="form-label form-label-sm mb-0">Até:</label>
+                  <input type="date" class="form-control form-control-sm" id="dataFimGrafico">
+                </div>
+                <div class="col-sm-auto">
+                  <label for="filtroMesGrafico" class="form-label form-label-sm mb-0">Mês:</label>
+                  <select id="filtroMesGrafico" class="form-select form-select-sm">
+                    <option value="">Todos</option>
+                    <option value="01">Janeiro</option>
+                    <option value="02">Fevereiro</option>
+                    <option value="03">Março</option>
+                    <option value="04">Abril</option>
+                    <option value="05">Maio</option>
+                    <option value="06">Junho</option>
+                    <option value="07">Julho</option>
+                    <option value="08">Agosto</option>
+                    <option value="09">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                  </select>
+                </div>
+                <div class="col-sm-auto">
+                  <label for="filtroAnoGrafico" class="form-label form-label-sm mb-0">Ano:</label>
+                  <select id="filtroAnoGrafico" class="form-select form-select-sm">
+                    <option value="">Todos</option>
+                    <!-- Anos serão preenchidos dinamicamente via JavaScript -->
+                  </select>
+                </div>
+                <div class="col-sm-auto mt-2 mt-sm-0 d-flex flex-column flex-sm-row gap-1">
+                  <button class="btn btn-black btn-sm" id="filtrarGrafico" style="padding: .25rem .5rem; font-size: .875rem;">Aplicar</button>
+                  <button class="btn btn-outline-secondary btn-sm" id="limparFiltroGrafico" title="Limpar Filtros do Gráfico" style="padding: .25rem .5rem; font-size: .875rem;">
+                    <i class="bi bi-x-circle"></i> Limpar
+                  </button>
+                </div>
+              </div>
+            </div>
+            
             <!-- Container para o gráfico selecionado -->
             <div class="chart-container">
               <canvas id="graficoAtual"></canvas>
@@ -107,14 +167,6 @@
             <!-- Controles específicos para o gráfico de evolução -->
             <div id="controlesEvolucao" class="mt-3" style="display: none;">
               <div class="row gx-2 gy-2 align-items-end">
-                <div class="col-sm-auto flex-grow-1">
-                  <label for="dataInicioEvolucao" class="form-label form-label-sm mb-0">De:</label>
-                  <input type="date" class="form-control form-control-sm" id="dataInicioEvolucao">
-                </div>
-                <div class="col-sm-auto flex-grow-1">
-                  <label for="dataFimEvolucao" class="form-label form-label-sm mb-0">Até:</label>
-                  <input type="date" class="form-control form-control-sm" id="dataFimEvolucao">
-                </div>
                 <div class="col-sm-auto">
                   <label for="periodoEvolucao" class="form-label form-label-sm mb-0">Agrupar:</label>
                   <select id="periodoEvolucao" class="form-select form-select-sm">
@@ -124,9 +176,6 @@
                 </div>
                 <div class="col-sm-auto mt-2 mt-sm-0 d-flex flex-column flex-sm-row gap-1">
                   <button class="btn btn-black btn-sm" id="filtrarGraficoEvolucao" style="padding: .25rem .5rem; font-size: .875rem;">Aplicar</button>
-                  <button class="btn btn-outline-secondary btn-sm" id="limparFiltroEvolucao" title="Limpar Filtros do Gráfico" style="padding: .25rem .5rem; font-size: .875rem;">
-                    <i class="bi bi-x-circle"></i> Limpar
-                  </button>
                 </div>
               </div>
             </div>
