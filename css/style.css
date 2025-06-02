@@ -109,7 +109,7 @@ a:focus {
 }
 
 .header_section .header_bottom {
-  background-color: #A7CAC9;
+  background-color: #172C66;
 }
 
 .header_section .header_bottom .container-fluid {
@@ -469,7 +469,7 @@ a:focus {
 }
 
 .book_section h4 span {
-  color: #A7CAC9;
+  color: #172C66;
 }
 
 .book_section h4::before {
@@ -479,7 +479,7 @@ a:focus {
   bottom: 0;
   width: 75px;
   height: 2px;
-  background-color: #A7CAC9;
+  background-color: #172C66;
 }
 
 .book_section form {
@@ -652,7 +652,7 @@ a:focus {
 }
 
 .team_section {
-  background-color: #A7CAC9;
+  background-color: #172C66;
 }
 
 .team_section .heading_container {
@@ -1005,7 +1005,7 @@ a:focus {
   left: 0;
   width: 15px;
   height: 15px;
-  background-color: #A7CAC9;
+  background-color: #172C66;
   -webkit-transform: translateY(-50%);
           transform: translateY(-50%);
 }
@@ -1108,7 +1108,7 @@ a:focus {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
-  color: #A7CAC9;
+  color: #172C66;
   font-size: 24px;
   margin-right: 10px;
 }
@@ -1145,7 +1145,7 @@ a:focus {
 }
 
 .auth-link:hover {
-  color: #A7CAC9;
+  color: #172C66;
 }
 
 .popupContainer {
@@ -1226,12 +1226,12 @@ a:focus {
   padding: 10px;
   text-decoration: none;
   color: #fff;
-  background: #A7CAC9;
+  background: #172C66;
   border-radius: 4px;
 }
 
 .btn_red {
-  background: #A7CAC9;
+  background: #172C66;
 }
 
 .back_btn {
@@ -1292,13 +1292,13 @@ form input {
 }
 
 .laudo-form .form-control:focus {
-  border-color: #A7CAC9;
+  border-color: #172C66;
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
 }
 
 /* Estilo para o botão preto */
 .btn-black {
-  background-color: #A7CAC9;
+  background-color: #172C66;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -1423,7 +1423,7 @@ form input {
   padding: 10px 20px;
   margin: 0 5px;
   border: none;
-  background-color: #A7CAC9;
+  background-color: #172C66;
   color: #172C66;
   cursor: pointer;
   border-radius: 5px;
@@ -1431,7 +1431,7 @@ form input {
 }
 
 .tab-buttons button:hover {
-  background-color: #A7CAC9;
+  background-color: #172C66;
 }
 
 .tab {
@@ -1460,7 +1460,7 @@ form input {
 .tab button {
   padding: 10px 20px;
   border: none;
-  background-color: #A7CAC9;
+  background-color: #172C66;
   color: #172C66;
   cursor: pointer;
   border-radius: 5px;
@@ -1468,7 +1468,7 @@ form input {
 }
 
 .tab button:hover {
-  background-color: #A7CAC9;
+  background-color: #172C66;
 }
 
 #pdf-list {
@@ -1664,8 +1664,8 @@ form input {
 }
 
 .dashboard_section .table .btn-primary {
-  background-color: #A7CAC9;
-  border-color: #A7CAC9;
+  background-color: #172C66;
+  border-color: #172C66;
   color: #172C66;
   padding: 6px 12px;
   border-radius: 4px;
@@ -1693,7 +1693,7 @@ form input {
 
 .dashboard_section .form-control,
 .dashboard_section .form-select {
-  border-color: #A7CAC9;
+  border-color: #172C66;
 }
 
 .dashboard_section .btn-secondary {
@@ -1711,11 +1711,11 @@ form input {
 
 /* Toast Styles */
 .dashboard_section .toast {
-  border-color: #A7CAC9;
+  border-color: #172C66;
 }
 
 .dashboard_section .toast-header {
-  background-color: #A7CAC9;
+  background-color: #172C66;
   color: #172C66;
 }
 
@@ -1727,12 +1727,12 @@ form input {
 /* Pagination Styles */
 .dashboard_section .pagination .page-link {
   color: #172C66;
-  border-color: #A7CAC9;
+  border-color: #172C66;
 }
 
 .dashboard_section .pagination .page-item.active .page-link {
-  background-color: #A7CAC9;
-  border-color: #A7CAC9;
+  background-color: #172C66;
+  border-color: #172C66;
   color: #172C66;
 }
 
@@ -1805,8 +1805,8 @@ form input {
 }
 
 .dashboard_section .table .btn-primary {
-  background-color: #A7CAC9;
-  border-color: #A7CAC9;
+  background-color: #172C66;
+  border-color: #172C66;
   color: #172C66;
   padding: 6px 12px;
   border-radius: 4px;
@@ -1834,7 +1834,7 @@ form input {
 
 .dashboard_section .form-control,
 .dashboard_section .form-select {
-  border-color: #A7CAC9;
+  border-color: #172C66;
 }
 
 .dashboard_section .btn-secondary {
@@ -1851,11 +1851,11 @@ form input {
 }
 
 .dashboard_section .toast {
-  border-color: #A7CAC9;
+  border-color: #172C66;
 }
 
 .dashboard_section .toast-header {
-  background-color: #A7CAC9;
+  background-color: #172C66;
   color: #172C66;
 }
 
@@ -1866,12 +1866,12 @@ form input {
 
 .dashboard_section .pagination .page-link {
   color: #172C66;
-  border-color: #A7CAC9;
+  border-color: #172C66;
 }
 
 .dashboard_section .pagination .page-item.active .page-link {
-  background-color: #A7CAC9;
-  border-color: #A7CAC9;
+  background-color: #172C66;
+  border-color: #172C66;
   color: #172C66;
 }
 
@@ -1893,7 +1893,7 @@ form input {
 
 .laudo-form .form-control,
 .laudo-form .form-select {
-  border-color: #A7CAC9;
+  border-color: #172C66;
 }
 
 .laudo-form .btn-black {
@@ -1949,7 +1949,7 @@ form input {
         border-radius: 5px;
         color: #000;
         background-color: #fff;
-        border: 1px solid #ddd;
+        border: 1px solid #ffffff;
         transition: background-color 0.3s;
     }
 
@@ -1967,7 +1967,7 @@ form input {
         color: #6c757d;
         pointer-events: none;
         background-color: #fff;
-        border-color: #ddd;
+        border-color: #ffffff;
     }
 
     .user-management-section {
@@ -2019,7 +2019,7 @@ form input {
     }
     
     .user-table th {
-      background-color: #A7CAC9;
+      background-color: #172C66;
       color: white;
     }
     
@@ -2078,7 +2078,7 @@ form input {
     .logo-img {
       max-height: 60px;
       width: auto;
-      border: 2px solid #A7CAC9; /* Borda preta para combinar com btn-black */
+      border: 2px solid #172C66; /* Borda preta para combinar com btn-black */
       border-radius: 5px; /* Bordas arredondadas */
     }
 
@@ -2155,15 +2155,15 @@ form input {
 
 /* Ajuste para o botão Editar */
 .table .btn-primary.edit-evidencia {
-  background-color: #A7CAC9;
-  border-color: #A7CAC9;
+  background-color: #172C66;
+  border-color: #172C66;
   color: #172C66;
 }
 
 /* Hover para o botão Editar */
 .table .btn-primary.edit-evidencia:hover {
-  background-color: #8ab8b7;
-  border-color: #8ab8b7;
+  background-color: #172C66;
+  border-color: #172C66;
 }
 
 /* Ajuste para o botão Excluir */
